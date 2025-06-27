@@ -57,6 +57,16 @@ temp_counter = 10000  # DB 쿠폰과 구분하기 위해 큰 숫자부터 시작
 async def root():
     return {"message": "쿠폰 트래커 API에 오신 것을 환영합니다! (DB 연동 버전)"}
 
+@app.get("/health")
+async def health_check():
+    """헬스체크 엔드포인트 - Railway가 서버 상태를 확인하는 데 사용"""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+
+@app.get("/api/health")
+async def api_health_check():
+    """API 헬스체크 엔드포인트"""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+
 @app.get("/coupons")
 async def get_coupons(
     search: str = Query(None, description="검색어"),
@@ -385,4 +395,5 @@ async def test_database_connection():
         }
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port) 

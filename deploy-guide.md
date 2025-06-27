@@ -18,8 +18,11 @@
 
 ### 1.3 백엔드 환경 변수 설정
 ```env
-DATABASE_URL=postgresql://user:password@host:port/database
+DATABASE_URL=postgresql://username:password@hostname:port/database_name
 CORS_ORIGINS=https://your-frontend-domain.vercel.app
+FRONTEND_URL=https://your-frontend-domain.vercel.app
+DEBUG=False
+ENVIRONMENT=production
 ```
 
 ### 1.4 Railway 배포 설정
