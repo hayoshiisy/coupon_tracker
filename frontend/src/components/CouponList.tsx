@@ -133,7 +133,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
         params.append('store_names', selectedStores.join(','));
       }
       params.append('page', currentPage.toString());
-      params.append('limit', '100');
+      params.append('size', '100');
 
       const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
       const response = await fetch(`${API_BASE_URL}/api/coupons?${params}`);
