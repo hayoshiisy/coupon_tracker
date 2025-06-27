@@ -107,7 +107,8 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
 
   const loadCouponNames = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/coupon-names');
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_BASE_URL}/api/coupon-names`);
       if (response.ok) {
         const data = await response.json();
         setAvailableCouponNames(data.coupon_names || []);
@@ -134,7 +135,8 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
       params.append('page', currentPage.toString());
       params.append('limit', '100');
 
-      const response = await fetch(`http://localhost:8000/api/coupons?${params}`);
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_BASE_URL}/api/coupons?${params}`);
       if (!response.ok) {
         throw new Error('Failed to fetch coupons');
       }
@@ -151,7 +153,8 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
 
   const fetchStoreNames = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/stores');
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_BASE_URL}/api/stores`);
       if (!response.ok) {
         throw new Error('Failed to fetch store names');
       }

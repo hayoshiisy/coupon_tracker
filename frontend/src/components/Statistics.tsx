@@ -114,7 +114,8 @@ const Statistics: React.FC = () => {
   const fetchStatistics = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:8000/api/statistics');
+      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const response = await fetch(`${API_BASE_URL}/api/statistics`);
       if (!response.ok) {
         throw new Error('통계 데이터를 불러오는데 실패했습니다');
       }
