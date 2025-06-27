@@ -11,14 +11,13 @@ import {
   Select,
   MenuItem,
   Box,
-  Typography,
   Chip,
   IconButton,
 } from '@mui/material';
 import { Close as CloseIcon, Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
 import { styled } from '@mui/material/styles';
 import { Coupon } from '../types/coupon';
-import { createCoupon, updateCoupon, getStoreNames } from '../services/api';
+import { getStoreNames } from '../services/api';
 
 interface CouponFormProps {
   open: boolean;
@@ -113,10 +112,6 @@ const CouponForm: React.FC<CouponFormProps> = ({
       });
     }
   }, [editingCoupon, open]);
-
-  const handleChange = (field: string, value: string | boolean) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -14,12 +14,10 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Button,
   styled,
   Chip
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 
@@ -127,16 +125,6 @@ const Statistics: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoBack = () => {
-    window.history.back();
-  };
-
-  const getRateColor = (rate: number) => {
-    if (rate >= 70) return '#4CAF50';
-    if (rate >= 40) return '#FF9800';
-    return '#F44336';
   };
 
   const getRateChipProps = (rate: number) => {
