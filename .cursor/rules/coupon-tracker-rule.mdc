@@ -1,0 +1,18 @@
+---
+description: 
+#특정 Command
+
+## 폴더 구조
+- 백엔드 관련 내용은 모두 backend 폴더에
+- 프론트엔드 관련 내용은 모두 frontend 폴더에
+
+## Command
+ - 백엔드를 새로 시작할 때는 항상 backend 폴더 내에서 시작해야 한다.
+  - cd backend && pkill -f python3 main.py && sleep 2 && python3 main.py &
+  - python3 main.py 명령어는 반드시 backend 폴더 내에서 시작해야 한다.
+
+ - frontend 관련 명령어는 모두 frontend 폴더에서 실행해야 한다.
+
+globs: 
+alwaysApply: true
+---

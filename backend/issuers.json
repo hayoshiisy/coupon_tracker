@@ -1,0 +1,65 @@
+{
+  "issuers": {
+    "8837e643a978c18b": {
+      "id": "8837e643a978c18b",
+      "name": "테스트발행자",
+      "email": "test@example.com",
+      "phone": "010-1234-5678",
+      "department": "마케팅팀",
+      "role": "매니저",
+      "is_active": true,
+      "created_at": "2025-07-07T18:10:59.862267",
+      "last_login": null,
+      "login_count": 0
+    },
+    "280914659da0de93": {
+      "id": "280914659da0de93",
+      "name": "새로운발행자",
+      "email": "new@example.com",
+      "phone": "01087654321",
+      "department": "영업팀",
+      "role": "팀장",
+      "is_active": true,
+      "created_at": "2025-07-07T18:25:42.113261",
+      "last_login": null,
+      "login_count": 0
+    },
+    "25d10202c4f31ae2": {
+      "id": "25d10202c4f31ae2",
+      "name": "테스트발행자3",
+      "email": "test3@example.com",
+      "phone": "01098765432",
+      "department": "개발팀",
+      "role": "개발자",
+      "is_active": true,
+      "created_at": "2025-07-07T18:31:00.812559",
+      "last_login": null,
+      "login_count": 0
+    },
+    "74a7ea726673fd3f": {
+      "id": "74a7ea726673fd3f",
+      "name": "프록시테스트",
+      "email": "proxy@test.com",
+      "phone": "01011112222",
+      "department": "테스트팀",
+      "role": "테스터",
+      "is_active": true,
+      "created_at": "2025-07-07T18:33:34.133445",
+      "last_login": null,
+      "login_count": 0
+    },
+    "406932339df1de19": {
+      "id": "406932339df1de19",
+      "name": "엄지희",
+      "email": "jeehee@butfitseoul.com",
+      "phone": "01038874245",
+      "department": "피플팀",
+      "role": "담당자",
+      "is_active": true,
+      "created_at": "2025-07-07T18:34:13.292134",
+      "last_login": "2025-07-07T19:26:30.224559",
+      "login_count": 23
+    }
+  },
+  "last_updated": "2025-07-07T19:26:30.224578"
+}

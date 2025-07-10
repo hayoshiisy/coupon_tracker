@@ -20,6 +20,9 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssessmentIcon from '@mui/icons-material/Assessment';
+import { fetchStatistics, StatisticsResponse } from '../services/api';
+import LocalOfferIcon from '@mui/icons-material/LocalOffer';
+import StoreIcon from '@mui/icons-material/Store';
 
 interface CouponStatistic {
   coupon_name: string;
@@ -40,8 +43,8 @@ interface StoreStatistic {
   overall_payment_rate: number;
 }
 
-interface StatisticsResponse {
-  statistics: StoreStatistic[];
+interface StatisticsProps {
+  teamId?: string;
 }
 
 const GlassAccordion = styled(Accordion)(({ theme }) => ({
@@ -102,31 +105,28 @@ const GlassTableContainer = styled(TableContainer)(({ theme }) => ({
   },
 }));
 
-const Statistics: React.FC = () => {
-  const [statistics, setStatistics] = useState<StoreStatistic[]>([]);
+export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
+  const [statistics, setStatistics] = useState<StatisticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchStatistics();
-  }, []);
-
-  const fetchStatistics = async () => {
-    try {
-      setLoading(true);
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${API_BASE_URL}/api/statistics`);
-      if (!response.ok) {
-        throw new Error('통계 데이터를 불러오는데 실패했습니다');
+    const loadStatistics = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await fetchStatistics(teamId);
+        setStatistics(data);
+      } catch (err) {
+        setError('통계 데이터를 불러오는데 실패했습니다.');
+        console.error('통계 로딩 실패:', err);
+      } finally {
+        setLoading(false);
       }
-      const data: StatisticsResponse = await response.json();
-      setStatistics(data.statistics);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+
+    loadStatistics();
+  }, [teamId]);
 
   const getRateChipProps = (rate: number) => {
     if (rate >= 70) return { 
@@ -263,70 +263,57 @@ const Statistics: React.FC = () => {
         </Typography>
         
         {/* 전체 요약 통계 */}
-        <Box 
-          display="flex" 
-          justifyContent="center" 
-          gap={3} 
-          flexWrap="wrap"
+        <Box
           sx={{ mb: 2 }}
         >
-          {statistics.length > 0 && (
+          {statistics && (
             <>
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`총 발행: ${statistics.reduce((sum, store) => sum + store.total_issued, 0)}개`}
+                label={`전체 쿠폰: ${statistics.summary.total_coupons}개`}
                 sx={{
                   background: 'rgba(255, 255, 255, 0.3)',
-                  color: '#ffffff',
+                  color: '#000000',
+                  fontWeight: 'bold',
+                  mr: 1,
+                  mb: 1,
                   border: '1px solid rgba(255, 255, 255, 0.5)',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  py: 2.5,
-                  px: 1,
-                  '& .MuiChip-label': {
-                    color: '#ffffff',
-                  },
-                  '& .MuiChip-icon': {
-                    color: '#ffffff',
-                  },
                 }}
               />
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`총 등록: ${statistics.reduce((sum, store) => sum + store.total_registered, 0)}개`}
+                label={`사용가능: ${statistics.summary.available_coupons}개`}
                 sx={{
                   background: 'rgba(76, 175, 80, 0.4)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(76, 175, 80, 0.7)',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  py: 2.5,
-                  px: 1,
-                  '& .MuiChip-label': {
-                    color: '#ffffff',
-                  },
-                  '& .MuiChip-icon': {
-                    color: '#ffffff',
-                  },
+                  color: '#FFFFFF',
+                  fontWeight: 'bold',
+                  mr: 1,
+                  mb: 1,
+                  border: '1px solid rgba(76, 175, 80, 0.6)',
                 }}
               />
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`총 결제완료: ${statistics.reduce((sum, store) => sum + store.total_payment_completed, 0)}개`}
+                label={`사용완료: ${statistics.summary.used_coupons}개`}
                 sx={{
                   background: 'rgba(0, 122, 255, 0.4)',
-                  color: '#ffffff',
-                  border: '1px solid rgba(0, 122, 255, 0.7)',
-                  fontWeight: 700,
-                  fontSize: '1rem',
-                  py: 2.5,
-                  px: 1,
-                  '& .MuiChip-label': {
-                    color: '#ffffff',
-                  },
-                  '& .MuiChip-icon': {
-                    color: '#ffffff',
-                  },
+                  color: '#FFFFFF',
+                  fontWeight: 'bold',
+                  mr: 1,
+                  mb: 1,
+                  border: '1px solid rgba(0, 122, 255, 0.6)',
+                }}
+              />
+              <Chip
+                icon={<TrendingUpIcon />}
+                label={`만료: ${statistics.summary.expired_coupons}개`}
+                sx={{
+                  background: 'rgba(244, 67, 54, 0.4)',
+                  color: '#FFFFFF',
+                  fontWeight: 'bold',
+                  mr: 1,
+                  mb: 1,
+                  border: '1px solid rgba(244, 67, 54, 0.6)',
                 }}
               />
             </>
@@ -335,123 +322,58 @@ const Statistics: React.FC = () => {
       </Paper>
 
       {/* 통계 데이터 */}
-      {statistics.length === 0 ? (
+      {statistics && statistics.store_statistics.length === 0 ? (
         <Alert 
           severity="info"
           sx={{
-            background: 'rgba(33, 150, 243, 0.15)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
-            border: '1px solid rgba(33, 150, 243, 0.3)',
-            borderRadius: 3,
-            color: '#FFFFFF',
-            '& .MuiAlert-icon': {
-              color: '#2196F3'
-            }
+            background: 'rgba(255, 255, 255, 0.2)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            borderRadius: '12px',
+            color: '#000000',
+            fontSize: '16px',
           }}
         >
           통계 데이터가 없습니다.
         </Alert>
       ) : (
-        statistics.map((storeData, index) => (
-          <GlassAccordion key={index} defaultExpanded>
+        <>
+          {/* 쿠폰별 통계 */}
+          <GlassAccordion defaultExpanded>
             <GlassAccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#FFFFFF' }} />}>
-              <Box>
-                <Typography 
-                  variant="h5" 
-                  sx={{ 
-                    fontWeight: 700, 
-                    mb: 2,
-                    color: '#FFFFFF',
-                    textShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
-                  }}
-                >
-                  📍 {storeData.store}
-                </Typography>
-                <Box display="flex" gap={2} flexWrap="wrap">
-                  <Chip
-                    label={`발행 ${storeData.total_issued}개`}
-                    size="small"
-                    sx={{
-                      background: 'rgba(255, 255, 255, 0.3)',
-                      color: '#ffffff',
-                      border: '1px solid rgba(255, 255, 255, 0.5)',
-                      fontWeight: 600,
-                      fontSize: '0.85rem',
-                      '& .MuiChip-label': {
-                        color: '#ffffff',
-                      },
-                    }}
-                  />
-                  <Chip
-                    label={`등록 ${storeData.total_registered}개 (${storeData.overall_registration_rate}%)`}
-                    size="small"
-                    {...getRateChipProps(storeData.overall_registration_rate)}
-                  />
-                  <Chip
-                    label={`결제완료 ${storeData.total_payment_completed}개 (${storeData.overall_payment_rate}%)`}
-                    size="small"
-                    {...getRateChipProps(storeData.overall_payment_rate)}
-                  />
-                </Box>
-              </Box>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 'bold',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <LocalOfferIcon />
+                쿠폰별 통계
+              </Typography>
             </GlassAccordionSummary>
             <AccordionDetails sx={{ p: 0 }}>
               <GlassTableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>쿠폰명</TableCell>
-                      <TableCell align="center">총 발행</TableCell>
-                      <TableCell align="center">등록 수</TableCell>
-                      <TableCell align="center">등록률</TableCell>
-                      <TableCell align="center">결제완료</TableCell>
-                      <TableCell align="center">결제율</TableCell>
+                      <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>쿠폰명</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>전체</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>사용가능</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>사용완료</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>만료</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {storeData.coupons.map((coupon, couponIndex) => (
-                      <TableRow key={couponIndex}>
-                        <TableCell component="th" scope="row">
-                          <Typography 
-                            variant="body2" 
-                            sx={{ 
-                              fontWeight: 500,
-                              color: '#FFFFFF'
-                            }}
-                          >
-                            {coupon.coupon_name}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#ffffff' }}>
-                            {coupon.total_count}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#ffffff' }}>
-                            {coupon.registered_count}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={`${coupon.registration_rate}%`}
-                            size="small"
-                            {...getRateChipProps(coupon.registration_rate)}
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#ffffff' }}>
-                            {coupon.payment_completed_count}
-                          </Typography>
-                        </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={`${coupon.payment_rate}%`}
-                            size="small"
-                            {...getRateChipProps(coupon.payment_rate)}
-                          />
-                        </TableCell>
+                    {statistics?.coupon_statistics.map((couponData, index) => (
+                      <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: 'rgba(255, 255, 255, 0.05)' } }}>
+                        <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>{couponData.name}</TableCell>
+                        <TableCell align="center" sx={{ color: '#FFFFFF' }}>{couponData.total}</TableCell>
+                        <TableCell align="center" sx={{ color: '#4CAF50' }}>{couponData.available}</TableCell>
+                        <TableCell align="center" sx={{ color: '#2196F3' }}>{couponData.used}</TableCell>
+                        <TableCell align="center" sx={{ color: '#F44336' }}>{couponData.expired}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -459,7 +381,52 @@ const Statistics: React.FC = () => {
               </GlassTableContainer>
             </AccordionDetails>
           </GlassAccordion>
-        ))
+
+          {/* 지점별 통계 */}
+          <GlassAccordion>
+            <GlassAccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#FFFFFF' }} />}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 'bold',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <StoreIcon />
+                지점별 통계
+              </Typography>
+            </GlassAccordionSummary>
+            <AccordionDetails sx={{ p: 0 }}>
+              <GlassTableContainer>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>지점명</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>전체</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>사용가능</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>사용완료</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>만료</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {statistics?.store_statistics.map((storeData, index) => (
+                      <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: 'rgba(255, 255, 255, 0.05)' } }}>
+                        <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>{storeData.name}</TableCell>
+                        <TableCell align="center" sx={{ color: '#FFFFFF' }}>{storeData.total}</TableCell>
+                        <TableCell align="center" sx={{ color: '#4CAF50' }}>{storeData.available}</TableCell>
+                        <TableCell align="center" sx={{ color: '#2196F3' }}>{storeData.used}</TableCell>
+                        <TableCell align="center" sx={{ color: '#F44336' }}>{storeData.expired}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </GlassTableContainer>
+            </AccordionDetails>
+          </GlassAccordion>
+        </>
       )}
     </Box>
   );

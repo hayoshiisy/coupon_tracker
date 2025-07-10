@@ -10,4 +10,5 @@ export interface Coupon {
   registered_by?: string;
   payment_status?: string;
   additional_info?: string;
+  issuer?: string; // 쿠폰발행자 이메일
 } 

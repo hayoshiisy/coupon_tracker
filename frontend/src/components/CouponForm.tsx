@@ -24,6 +24,7 @@ interface CouponFormProps {
   onClose: () => void;
   onSubmit: (coupon: Omit<Coupon, 'id'>) => void;
   editingCoupon?: Coupon | null;
+  teamId?: string;
 }
 
 // Styled components for glass effect
@@ -55,6 +56,7 @@ const CouponForm: React.FC<CouponFormProps> = ({
   onClose,
   onSubmit,
   editingCoupon,
+  teamId,
 }) => {
   const [storeNames, setStoreNames] = useState<string[]>([]);
   const [formData, setFormData] = useState({

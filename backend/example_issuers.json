@@ -1,0 +1,39 @@
+{
+  "issuers": [
+    {
+      "name": "홍길동",
+      "email": "hong@company.com",
+      "phone": "010-1234-5678",
+      "department": "마케팅팀",
+      "role": "마케팅 매니저"
+    },
+    {
+      "name": "김철수",
+      "email": "kim@store.co.kr",
+      "phone": "010-9876-5432",
+      "department": "영업팀",
+      "role": "영업 대표"
+    },
+    {
+      "name": "이영희",
+      "email": "lee@shop.com",
+      "phone": "010-5555-1234",
+      "department": "프로모션팀",
+      "role": "프로모션 기획자"
+    },
+    {
+      "name": "박민수",
+      "email": "park@restaurant.kr",
+      "phone": "010-7777-8888",
+      "department": "운영팀",
+      "role": "매장 운영자"
+    },
+    {
+      "name": "정다은",
+      "email": "jung@beauty.co.kr",
+      "phone": "010-3333-4444",
+      "department": "뷰티팀",
+      "role": "뷰티 코디네이터"
+    }
+  ]
+} 
