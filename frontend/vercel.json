@@ -16,6 +16,18 @@
       }
     },
     {
+      "src": "/manifest.json",
+      "dest": "/manifest.json"
+    },
+    {
+      "src": "/favicon.ico",
+      "dest": "/favicon.ico"
+    },
+    {
+      "src": "/logo(\\d+).png",
+      "dest": "/logo$1.png"
+    },
+    {
       "src": "/(.*)",
       "dest": "/index.html"
     }
