@@ -259,7 +259,7 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
             textShadow: '0 1px 5px rgba(0, 0, 0, 0.2)',
           }}
         >
-          매장별 쿠폰 발행, 등록, 결제 현황을 한눈에 확인하세요
+          쿠폰 발행, 등록, 결제 현황을 한눈에 확인하세요
         </Typography>
         
         {/* 전체 요약 통계 */}
@@ -270,7 +270,7 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
             <>
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`발행수: ${statistics.summary.total_issued_count}개`}
+                label={`발행수: ${statistics.summary.total_issued_count || 0}개`}
                 sx={{
                   background: 'rgba(255, 255, 255, 0.3)',
                   color: '#000000',
@@ -282,7 +282,7 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
               />
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`등록유저수: ${statistics.summary.total_registered_users_count}명`}
+                label={`등록유저수: ${statistics.summary.total_registered_users_count || 0}명`}
                 sx={{
                   background: 'rgba(76, 175, 80, 0.4)',
                   color: '#FFFFFF',
@@ -294,7 +294,7 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
               />
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`결제완료수: ${statistics.summary.total_payment_completed_count}개`}
+                label={`결제완료수: ${statistics.summary.total_payment_completed_count || 0}개`}
                 sx={{
                   background: 'rgba(0, 122, 255, 0.4)',
                   color: '#FFFFFF',
@@ -306,20 +306,32 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
               />
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`등록률: ${statistics.summary.total_registration_rate}%`}
-                {...getRateChipProps(statistics.summary.total_registration_rate)}
+                label={`등록률: ${statistics.summary.total_registration_rate ?? 
+                  (statistics.summary.total_issued_count > 0 ? 
+                    Math.round((statistics.summary.total_registered_users_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0)}%`}
+                {...getRateChipProps(statistics.summary.total_registration_rate ?? 
+                  (statistics.summary.total_issued_count > 0 ? 
+                    Math.round((statistics.summary.total_registered_users_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0))}
                 sx={{
-                  ...getRateChipProps(statistics.summary.total_registration_rate).sx,
+                  ...getRateChipProps(statistics.summary.total_registration_rate ?? 
+                    (statistics.summary.total_issued_count > 0 ? 
+                      Math.round((statistics.summary.total_registered_users_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0)).sx,
                   mr: 1,
                   mb: 1,
                 }}
               />
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`결제율: ${statistics.summary.total_payment_rate}%`}
-                {...getRateChipProps(statistics.summary.total_payment_rate)}
+                label={`결제율: ${statistics.summary.total_payment_rate ?? 
+                  (statistics.summary.total_issued_count > 0 ? 
+                    Math.round((statistics.summary.total_payment_completed_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0)}%`}
+                {...getRateChipProps(statistics.summary.total_payment_rate ?? 
+                  (statistics.summary.total_issued_count > 0 ? 
+                    Math.round((statistics.summary.total_payment_completed_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0))}
                 sx={{
-                  ...getRateChipProps(statistics.summary.total_payment_rate).sx,
+                  ...getRateChipProps(statistics.summary.total_payment_rate ?? 
+                    (statistics.summary.total_issued_count > 0 ? 
+                      Math.round((statistics.summary.total_payment_completed_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0)).sx,
                   mr: 1,
                   mb: 1,
                 }}
@@ -376,28 +388,38 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {statistics?.coupon_statistics.map((couponData, index) => (
-                      <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: 'rgba(255, 255, 255, 0.05)' } }}>
-                        <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>{couponData.name}</TableCell>
-                        <TableCell align="center" sx={{ color: '#FFFFFF' }}>{couponData.issued_count}</TableCell>
-                        <TableCell align="center" sx={{ color: '#4CAF50' }}>{couponData.registered_users_count}</TableCell>
-                        <TableCell align="center" sx={{ color: '#2196F3' }}>{couponData.payment_completed_count}</TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={`${couponData.registration_rate}%`}
-                            size="small"
-                            {...getRateChipProps(couponData.registration_rate)}
-                          />
-                        </TableCell>
-                        <TableCell align="center">
-                          <Chip
-                            label={`${couponData.payment_rate}%`}
-                            size="small"
-                            {...getRateChipProps(couponData.payment_rate)}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {statistics?.coupon_statistics.map((couponData, index) => {
+                      // 백엔드에서 비율이 없는 경우 프론트엔드에서 계산
+                      const registrationRate = couponData.registration_rate ?? 
+                        (couponData.issued_count > 0 ? 
+                          Math.round((couponData.registered_users_count / couponData.issued_count) * 100 * 10) / 10 : 0);
+                      const paymentRate = couponData.payment_rate ?? 
+                        (couponData.issued_count > 0 ? 
+                          Math.round((couponData.payment_completed_count / couponData.issued_count) * 100 * 10) / 10 : 0);
+                      
+                      return (
+                        <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: 'rgba(255, 255, 255, 0.05)' } }}>
+                          <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>{couponData.name}</TableCell>
+                          <TableCell align="center" sx={{ color: '#FFFFFF' }}>{couponData.issued_count}</TableCell>
+                          <TableCell align="center" sx={{ color: '#4CAF50' }}>{couponData.registered_users_count}</TableCell>
+                          <TableCell align="center" sx={{ color: '#2196F3' }}>{couponData.payment_completed_count}</TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              label={`${registrationRate}%`}
+                              size="small"
+                              {...getRateChipProps(registrationRate)}
+                            />
+                          </TableCell>
+                          <TableCell align="center">
+                            <Chip
+                              label={`${paymentRate}%`}
+                              size="small"
+                              {...getRateChipProps(paymentRate)}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               </GlassTableContainer>
