@@ -109,10 +109,9 @@ export interface PaginatedCoupons {
 
 export interface CouponStatistic {
   name: string;
-  total: number;
-  used: number;
-  expired: number;
-  available: number;
+  issued_count: number;
+  registered_users_count: number;
+  payment_completed_count: number;
 }
 
 export interface StoreStatistic {
@@ -133,6 +132,7 @@ export interface StatisticsResponse {
   };
   coupon_statistics: CouponStatistic[];
   store_statistics: StoreStatistic[];
+  store_coupon_names: Record<string, string[]>;
 }
 
 // 팀별 쿠폰 조회

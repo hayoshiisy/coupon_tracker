@@ -360,20 +360,18 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
                   <TableHead>
                     <TableRow>
                       <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>쿠폰명</TableCell>
-                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>전체</TableCell>
-                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>사용가능</TableCell>
-                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>사용완료</TableCell>
-                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>만료</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>발행수</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>등록유저수</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>결제완료수</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {statistics?.coupon_statistics.map((couponData, index) => (
                       <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: 'rgba(255, 255, 255, 0.05)' } }}>
                         <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>{couponData.name}</TableCell>
-                        <TableCell align="center" sx={{ color: '#FFFFFF' }}>{couponData.total}</TableCell>
-                        <TableCell align="center" sx={{ color: '#4CAF50' }}>{couponData.available}</TableCell>
-                        <TableCell align="center" sx={{ color: '#2196F3' }}>{couponData.used}</TableCell>
-                        <TableCell align="center" sx={{ color: '#F44336' }}>{couponData.expired}</TableCell>
+                        <TableCell align="center" sx={{ color: '#FFFFFF' }}>{couponData.issued_count}</TableCell>
+                        <TableCell align="center" sx={{ color: '#4CAF50' }}>{couponData.registered_users_count}</TableCell>
+                        <TableCell align="center" sx={{ color: '#2196F3' }}>{couponData.payment_completed_count}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -396,7 +394,7 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
                 }}
               >
                 <StoreIcon />
-                지점별 통계
+                지점별 통계 (쿠폰 상태)
               </Typography>
             </GlassAccordionSummary>
             <AccordionDetails sx={{ p: 0 }}>
@@ -424,6 +422,60 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
                   </TableBody>
                 </Table>
               </GlassTableContainer>
+            </AccordionDetails>
+          </GlassAccordion>
+
+          {/* 지점별 쿠폰명 목록 */}
+          <GlassAccordion>
+            <GlassAccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#FFFFFF' }} />}>
+              <Typography
+                variant="h6"
+                sx={{
+                  fontWeight: 'bold',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1,
+                }}
+              >
+                <StoreIcon />
+                지점별 쿠폰명 목록
+              </Typography>
+            </GlassAccordionSummary>
+            <AccordionDetails sx={{ p: 2 }}>
+              {statistics?.store_coupon_names && Object.entries(statistics.store_coupon_names).map(([storeName, couponNames]) => (
+                <Box key={storeName} sx={{ mb: 3 }}>
+                  <Typography
+                    variant="h6"
+                    sx={{
+                      color: '#FFFFFF',
+                      fontWeight: 'bold',
+                      mb: 1,
+                      borderBottom: '2px solid rgba(255, 255, 255, 0.3)',
+                      pb: 1
+                    }}
+                  >
+                    {storeName}
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {(couponNames as string[]).map((couponName, index) => (
+                      <Chip
+                        key={index}
+                        label={couponName}
+                        sx={{
+                          background: 'rgba(255, 255, 255, 0.2)',
+                          color: '#FFFFFF',
+                          fontWeight: 'bold',
+                          border: '1px solid rgba(255, 255, 255, 0.3)',
+                          '&:hover': {
+                            background: 'rgba(255, 255, 255, 0.3)',
+                          }
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              ))}
             </AccordionDetails>
           </GlassAccordion>
         </>
