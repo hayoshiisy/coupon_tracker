@@ -270,7 +270,7 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
             <>
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`전체 쿠폰: ${statistics.summary.total_coupons}개`}
+                label={`발행수: ${statistics.summary.total_issued_count}개`}
                 sx={{
                   background: 'rgba(255, 255, 255, 0.3)',
                   color: '#000000',
@@ -282,7 +282,7 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
               />
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`사용가능: ${statistics.summary.available_coupons}개`}
+                label={`등록유저수: ${statistics.summary.total_registered_users_count}명`}
                 sx={{
                   background: 'rgba(76, 175, 80, 0.4)',
                   color: '#FFFFFF',
@@ -294,7 +294,7 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
               />
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`사용완료: ${statistics.summary.used_coupons}개`}
+                label={`결제완료수: ${statistics.summary.total_payment_completed_count}개`}
                 sx={{
                   background: 'rgba(0, 122, 255, 0.4)',
                   color: '#FFFFFF',
@@ -306,14 +306,22 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
               />
               <Chip
                 icon={<TrendingUpIcon />}
-                label={`만료: ${statistics.summary.expired_coupons}개`}
+                label={`등록률: ${statistics.summary.total_registration_rate}%`}
+                {...getRateChipProps(statistics.summary.total_registration_rate)}
                 sx={{
-                  background: 'rgba(244, 67, 54, 0.4)',
-                  color: '#FFFFFF',
-                  fontWeight: 'bold',
+                  ...getRateChipProps(statistics.summary.total_registration_rate).sx,
                   mr: 1,
                   mb: 1,
-                  border: '1px solid rgba(244, 67, 54, 0.6)',
+                }}
+              />
+              <Chip
+                icon={<TrendingUpIcon />}
+                label={`결제율: ${statistics.summary.total_payment_rate}%`}
+                {...getRateChipProps(statistics.summary.total_payment_rate)}
+                sx={{
+                  ...getRateChipProps(statistics.summary.total_payment_rate).sx,
+                  mr: 1,
+                  mb: 1,
                 }}
               />
             </>
@@ -363,6 +371,8 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
                       <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>발행수</TableCell>
                       <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>등록유저수</TableCell>
                       <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>결제완료수</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>등록률</TableCell>
+                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>결제율</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -372,6 +382,20 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
                         <TableCell align="center" sx={{ color: '#FFFFFF' }}>{couponData.issued_count}</TableCell>
                         <TableCell align="center" sx={{ color: '#4CAF50' }}>{couponData.registered_users_count}</TableCell>
                         <TableCell align="center" sx={{ color: '#2196F3' }}>{couponData.payment_completed_count}</TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={`${couponData.registration_rate}%`}
+                            size="small"
+                            {...getRateChipProps(couponData.registration_rate)}
+                          />
+                        </TableCell>
+                        <TableCell align="center">
+                          <Chip
+                            label={`${couponData.payment_rate}%`}
+                            size="small"
+                            {...getRateChipProps(couponData.payment_rate)}
+                          />
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

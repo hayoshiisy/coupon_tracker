@@ -522,12 +522,6 @@ async def get_team_statistics(team_id: str):
         result = db_service.get_coupons_from_db(team_id=team_id, page=1, size=10000)
         coupons = result['coupons']
         
-        # 전체 통계 계산
-        total_coupons = len(coupons)
-        used_coupons = len([c for c in coupons if c['status'] == '사용완료'])
-        available_coupons = len([c for c in coupons if c['status'] == '사용가능'])
-        expired_coupons = len([c for c in coupons if c['status'] == '만료'])
-        
         # 지점별 통계 (기존 유지)
         store_stats = {}
         for coupon in coupons:
@@ -546,6 +540,11 @@ async def get_team_statistics(team_id: str):
         # 지점별 쿠폰명 그룹화 및 쿠폰명별 집계
         store_coupon_stats = {}
         coupon_name_stats = {}
+        
+        # 전체 통계를 위한 변수들
+        total_issued_count = 0
+        total_registered_users = set()
+        total_payment_completed = 0
         
         for coupon in coupons:
             store = coupon['store']
@@ -568,28 +567,45 @@ async def get_team_statistics(team_id: str):
             
             # 발행된 쿠폰수 증가
             coupon_name_stats[coupon_name]['issued_count'] += 1
+            total_issued_count += 1
             
             # 등록한 유저 추가 (registered_by가 있고 공백이 아닌 경우)
             if registered_by and registered_by.strip() and registered_by.strip() != '미등록':
                 coupon_name_stats[coupon_name]['registered_users'].add(registered_by.strip())
+                total_registered_users.add(registered_by.strip())
             
             # 결제완료 수 증가
             if payment_status == '결제완료':
                 coupon_name_stats[coupon_name]['payment_completed_count'] += 1
+                total_payment_completed += 1
+        
+        # 전체 통계 계산
+        total_registered_users_count = len(total_registered_users)
+        total_registration_rate = round((total_registered_users_count / total_issued_count) * 100, 1) if total_issued_count > 0 else 0.0
+        total_payment_rate = round((total_payment_completed / total_issued_count) * 100, 1) if total_issued_count > 0 else 0.0
         
         # 지점별 쿠폰명 리스트로 변환
         store_coupon_list = {}
         for store, coupon_names in store_coupon_stats.items():
             store_coupon_list[store] = sorted(list(coupon_names))
         
-        # 쿠폰명별 통계를 최종 형태로 변환
+        # 쿠폰명별 통계를 최종 형태로 변환 (등록률, 결제율 추가)
         coupon_statistics = []
         for coupon_name, stats in coupon_name_stats.items():
+            issued_count = stats['issued_count']
+            registered_users_count = len(stats['registered_users'])
+            payment_completed_count = stats['payment_completed_count']
+            
+            registration_rate = round((registered_users_count / issued_count) * 100, 1) if issued_count > 0 else 0.0
+            payment_rate = round((payment_completed_count / issued_count) * 100, 1) if issued_count > 0 else 0.0
+            
             coupon_statistics.append({
                 "name": coupon_name,
-                "issued_count": stats['issued_count'],
-                "registered_users_count": len(stats['registered_users']),
-                "payment_completed_count": stats['payment_completed_count']
+                "issued_count": issued_count,
+                "registered_users_count": registered_users_count,
+                "payment_completed_count": payment_completed_count,
+                "registration_rate": registration_rate,
+                "payment_rate": payment_rate
             })
         
         # 쿠폰명으로 정렬
@@ -598,10 +614,16 @@ async def get_team_statistics(team_id: str):
         return {
             "team_id": team_id,
             "summary": {
-                "total_coupons": total_coupons,
-                "used_coupons": used_coupons,
-                "available_coupons": available_coupons,
-                "expired_coupons": expired_coupons
+                "total_issued_count": total_issued_count,
+                "total_registered_users_count": total_registered_users_count,
+                "total_payment_completed_count": total_payment_completed,
+                "total_registration_rate": total_registration_rate,
+                "total_payment_rate": total_payment_rate,
+                # 기존 필드들도 유지 (호환성을 위해)
+                "total_coupons": len(coupons),
+                "used_coupons": len([c for c in coupons if c['status'] == '사용완료']),
+                "available_coupons": len([c for c in coupons if c['status'] == '사용가능']),
+                "expired_coupons": len([c for c in coupons if c['status'] == '만료'])
             },
             "store_statistics": [
                 {

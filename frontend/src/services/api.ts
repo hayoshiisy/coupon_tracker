@@ -112,6 +112,8 @@ export interface CouponStatistic {
   issued_count: number;
   registered_users_count: number;
   payment_completed_count: number;
+  registration_rate: number;
+  payment_rate: number;
 }
 
 export interface StoreStatistic {
@@ -125,6 +127,12 @@ export interface StoreStatistic {
 export interface StatisticsResponse {
   team_id?: string;
   summary: {
+    total_issued_count: number;
+    total_registered_users_count: number;
+    total_payment_completed_count: number;
+    total_registration_rate: number;
+    total_payment_rate: number;
+    // 기존 필드들 (호환성을 위해 유지)
     total_coupons: number;
     used_coupons: number;
     expired_coupons: number;
