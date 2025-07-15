@@ -524,57 +524,77 @@ async def get_team_statistics(team_id: str):
         
         # 통계 계산
         total_coupons = len(coupons)
-        used_coupons = len([c for c in coupons if c['status'] == '사용됨'])
+        used_coupons = len([c for c in coupons if c['status'] == '사용완료'])
+        available_coupons = len([c for c in coupons if c['status'] == '사용가능'])
+        expired_coupons = len([c for c in coupons if c['status'] == '만료'])
         
         # 지점별 통계
         store_stats = {}
         for coupon in coupons:
             store = coupon['store']
             if store not in store_stats:
-                store_stats[store] = {'total': 0, 'used': 0, 'unused': 0}
+                store_stats[store] = {'total': 0, 'used': 0, 'available': 0, 'expired': 0}
             
             store_stats[store]['total'] += 1
-            if coupon['status'] == '사용됨':
+            if coupon['status'] == '사용완료':
                 store_stats[store]['used'] += 1
-            else:
-                store_stats[store]['unused'] += 1
+            elif coupon['status'] == '사용가능':
+                store_stats[store]['available'] += 1
+            elif coupon['status'] == '만료':
+                store_stats[store]['expired'] += 1
         
         # 쿠폰명별 통계
         coupon_name_stats = {}
         for coupon in coupons:
             name = coupon['name']
             if name not in coupon_name_stats:
-                coupon_name_stats[name] = {'total': 0, 'used': 0, 'unused': 0}
+                coupon_name_stats[name] = {
+                    'total_count': 0, 
+                    'registered_count': 0, 
+                    'payment_completed_count': 0,
+                    'registration_rate': 0.0,
+                    'payment_rate': 0.0
+                }
             
-            coupon_name_stats[name]['total'] += 1
-            if coupon['status'] == '사용됨':
-                coupon_name_stats[name]['used'] += 1
-            else:
-                coupon_name_stats[name]['unused'] += 1
+            coupon_name_stats[name]['total_count'] += 1
+            if coupon['status'] == '사용완료':
+                coupon_name_stats[name]['payment_completed_count'] += 1
+                coupon_name_stats[name]['registered_count'] += 1
+            elif coupon['status'] == '사용가능':
+                coupon_name_stats[name]['registered_count'] += 1
+        
+        # 비율 계산
+        for name, stats in coupon_name_stats.items():
+            if stats['total_count'] > 0:
+                stats['registration_rate'] = round((stats['registered_count'] / stats['total_count'] * 100), 1)
+                stats['payment_rate'] = round((stats['payment_completed_count'] / stats['total_count'] * 100), 1)
         
         return {
             "team_id": team_id,
-            "total_coupons": total_coupons,
-            "used_coupons": used_coupons,
-            "unused_coupons": total_coupons - used_coupons,
-            "usage_rate": round((used_coupons / total_coupons * 100), 1) if total_coupons > 0 else 0,
+            "summary": {
+                "total_coupons": total_coupons,
+                "used_coupons": used_coupons,
+                "available_coupons": available_coupons,
+                "expired_coupons": expired_coupons
+            },
             "store_statistics": [
                 {
-                    "store": store,
+                    "name": store,
                     "total": stats['total'],
                     "used": stats['used'],
-                    "unused": stats['unused'],
-                    "usage_rate": round((stats['used'] / stats['total'] * 100), 1) if stats['total'] > 0 else 0
+                    "available": stats['available'],
+                    "expired": stats['expired']
                 }
                 for store, stats in store_stats.items()
             ],
-            "coupon_name_statistics": [
+            "coupon_statistics": [
                 {
                     "coupon_name": name,
-                    "total": stats['total'],
-                    "used": stats['used'],
-                    "unused": stats['unused'],
-                    "usage_rate": round((stats['used'] / stats['total'] * 100), 1) if stats['total'] > 0 else 0
+                    "total_count": stats['total_count'],
+                    "registered_count": stats['registered_count'],
+                    "payment_completed_count": stats['payment_completed_count'],
+                    "registration_rate": stats['registration_rate'],
+                    "payment_rate": stats['payment_rate']
                 }
                 for name, stats in coupon_name_stats.items()
             ]

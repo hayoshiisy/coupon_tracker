@@ -492,6 +492,8 @@ function TeamContent() {
             justifyContent: 'space-between',
           }}>
             <Box sx={{ flex: 1 }}>
+              {/* 팀 변경과 관리자 버튼을 숨김 처리 */}
+              {/* 
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Button
                   variant="outlined"
@@ -524,6 +526,7 @@ function TeamContent() {
                   관리자
                 </Button>
               </Box>
+              */}
             </Box>
             
             <Box sx={{ textAlign: 'center', flex: 2 }}>
