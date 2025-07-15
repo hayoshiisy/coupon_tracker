@@ -548,26 +548,15 @@ async def get_team_statistics(team_id: str):
         for coupon in coupons:
             name = coupon['name']
             if name not in coupon_name_stats:
-                coupon_name_stats[name] = {
-                    'total_count': 0, 
-                    'registered_count': 0, 
-                    'payment_completed_count': 0,
-                    'registration_rate': 0.0,
-                    'payment_rate': 0.0
-                }
+                coupon_name_stats[name] = {'total': 0, 'used': 0, 'available': 0, 'expired': 0}
             
-            coupon_name_stats[name]['total_count'] += 1
+            coupon_name_stats[name]['total'] += 1
             if coupon['status'] == '사용완료':
-                coupon_name_stats[name]['payment_completed_count'] += 1
-                coupon_name_stats[name]['registered_count'] += 1
+                coupon_name_stats[name]['used'] += 1
             elif coupon['status'] == '사용가능':
-                coupon_name_stats[name]['registered_count'] += 1
-        
-        # 비율 계산
-        for name, stats in coupon_name_stats.items():
-            if stats['total_count'] > 0:
-                stats['registration_rate'] = round((stats['registered_count'] / stats['total_count'] * 100), 1)
-                stats['payment_rate'] = round((stats['payment_completed_count'] / stats['total_count'] * 100), 1)
+                coupon_name_stats[name]['available'] += 1
+            elif coupon['status'] == '만료':
+                coupon_name_stats[name]['expired'] += 1
         
         return {
             "team_id": team_id,
@@ -589,12 +578,11 @@ async def get_team_statistics(team_id: str):
             ],
             "coupon_statistics": [
                 {
-                    "coupon_name": name,
-                    "total_count": stats['total_count'],
-                    "registered_count": stats['registered_count'],
-                    "payment_completed_count": stats['payment_completed_count'],
-                    "registration_rate": stats['registration_rate'],
-                    "payment_rate": stats['payment_rate']
+                    "name": name,
+                    "total": stats['total'],
+                    "used": stats['used'],
+                    "available": stats['available'],
+                    "expired": stats['expired']
                 }
                 for name, stats in coupon_name_stats.items()
             ]
