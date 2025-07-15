@@ -599,6 +599,9 @@ async def get_team_statistics(team_id: str):
             registration_rate = round((registered_users_count / issued_count) * 100, 1) if issued_count > 0 else 0.0
             payment_rate = round((payment_completed_count / issued_count) * 100, 1) if issued_count > 0 else 0.0
             
+            # 디버깅용 로그 추가
+            logger.info(f"쿠폰 '{coupon_name}': 등록률={registration_rate}%, 결제율={payment_rate}%")
+            
             coupon_statistics.append({
                 "name": coupon_name,
                 "issued_count": issued_count,
