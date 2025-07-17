@@ -18,29 +18,19 @@ import {
   CircularProgress,
   Alert,
   IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  Grid,
   AppBar,
-  Toolbar,
-  Tooltip
+  Toolbar
 } from '@mui/material';
 import {
   Refresh as RefreshIcon,
   Logout as LogoutIcon,
-  Download as DownloadIcon,
-  Visibility as VisibilityIcon,
   Receipt,
   CheckCircle,
   Schedule,
   Cancel,
   Person,
   Email,
-  Phone,
-  CalendarToday
+  Phone
 } from '@mui/icons-material';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';

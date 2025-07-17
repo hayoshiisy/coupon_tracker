@@ -21,7 +21,6 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import { fetchStatistics, StatisticsResponse } from '../services/api';
-import LocalOfferIcon from '@mui/icons-material/LocalOffer';
 import StoreIcon from '@mui/icons-material/Store';
 
 interface CouponStatistic {
