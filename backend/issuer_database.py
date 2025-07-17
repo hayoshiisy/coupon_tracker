@@ -135,16 +135,32 @@ class IssuerDatabaseService:
             conn = self.get_connection()
             cursor = conn.cursor()
             
-            # 쿠폰 할당 (중복 방지) - issuer_email로 변경
+            # 기존 할당이 있는지 확인
             cursor.execute("""
-                INSERT OR IGNORE INTO coupon_issuer_mapping (coupon_id, issuer_email) 
-                VALUES (?, ?)
-            """, (coupon_id, email))
+                SELECT issuer_email FROM coupon_issuer_mapping 
+                WHERE coupon_id = ?
+            """, (coupon_id,))
+            existing = cursor.fetchone()
+            
+            if existing:
+                # 기존 할당이 있으면 업데이트
+                cursor.execute("""
+                    UPDATE coupon_issuer_mapping 
+                    SET issuer_email = ?, assigned_at = CURRENT_TIMESTAMP
+                    WHERE coupon_id = ?
+                """, (email, coupon_id))
+                logger.info(f"쿠폰 {coupon_id}의 발행자를 {existing[0]}에서 {email}로 업데이트했습니다.")
+            else:
+                # 새로운 할당
+                cursor.execute("""
+                    INSERT INTO coupon_issuer_mapping (coupon_id, issuer_email) 
+                    VALUES (?, ?)
+                """, (coupon_id, email))
+                logger.info(f"쿠폰 {coupon_id}을 발행자 {email}에게 새로 할당했습니다.")
             
             conn.commit()
             conn.close()
             
-            logger.info(f"쿠폰 {coupon_id}을 발행자 {email}에게 할당했습니다.")
             return True
             
         except Exception as e:
