@@ -30,7 +30,8 @@ import {
   DialogContent,
   DialogActions,
   Checkbox,
-  ListItemText
+  ListItemText,
+  Autocomplete
 } from '@mui/material';
 import {
   Code as CodeIcon,
@@ -575,14 +576,8 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
   };
 
   // 쿠폰발행자 필터링 관련 함수들
-  const handleTempOwnerChange = (event: SelectChangeEvent<string[]>) => {
-    const value = event.target.value;
-    setTempSelectedOwners(typeof value === 'string' ? value.split(',') : value);
-  };
-
-  const handleTempOwnerDelete = (ownerToDelete: string) => (event: React.MouseEvent) => {
-    event.stopPropagation();
-    setTempSelectedOwners(tempSelectedOwners.filter(owner => owner !== ownerToDelete));
+  const handleTempOwnerDelete = (ownerToDelete: string) => () => {
+    setTempSelectedOwners(prev => prev.filter(owner => owner !== ownerToDelete));
   };
 
   const handleTempClearAllOwners = () => {
@@ -963,111 +958,111 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                   )}
                 </Box>
 
-                <FormControl 
-                  fullWidth 
-                  sx={{ 
-                    mb: 2,
-                    '& .MuiOutlinedInput-root': {
-                      background: 'rgba(255, 255, 255, 0.8)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: '12px',
-                      '& fieldset': {
-                        borderColor: 'rgba(102, 126, 234, 0.3)',
+                <Autocomplete
+                  multiple
+                  options={availableOwners}
+                  value={tempSelectedOwners}
+                  onChange={(event, newValue) => {
+                    setTempSelectedOwners(newValue);
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="쿠폰발행자 선택"
+                      placeholder="쿠폰발행자 검색"
+                      InputProps={{
+                        ...params.InputProps,
+                        startAdornment: (
+                          <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                        ),
+                        endAdornment: (
+                          <>
+                            {tempSelectedOwners.length > 0 && (
+                              <IconButton onClick={handleTempClearAllOwners}>
+                                <ClearAllIcon />
+                              </IconButton>
+                            )}
+                            {params.InputProps.endAdornment}
+                          </>
+                        ),
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
+                          background: 'rgba(255, 255, 255, 0.8)',
+                          backdropFilter: 'blur(10px)',
+                          borderRadius: '12px',
+                          '& fieldset': {
+                            borderColor: 'rgba(102, 126, 234, 0.3)',
+                          },
+                          '&:hover fieldset': {
+                            borderColor: 'rgba(102, 126, 234, 0.5)',
+                          },
+                          '&.Mui-focused fieldset': {
+                            borderColor: '#667eea',
+                          },
+                        },
+                      }}
+                    />
+                  )}
+                  renderTags={(tagValue, getTagProps) =>
+                    tagValue.map((option, index) => (
+                      <Chip
+                        label={option}
+                        {...getTagProps({ index })}
+                        sx={{
+                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                          color: 'white',
+                          fontWeight: 500,
+                          '& .MuiChip-deleteIcon': {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                            fontSize: '16px',
+                            '&:hover': {
+                              color: 'white',
+                            },
+                          },
+                        }}
+                      />
+                    ))
+                  }
+                  renderOption={(props, option) => (
+                    <li {...props}>
+                      <Checkbox
+                        checked={tempSelectedOwners.indexOf(option) > -1}
+                        sx={{
+                          color: '#667eea',
+                          '&.Mui-checked': {
+                            color: '#667eea',
+                          },
+                        }}
+                      />
+                      <ListItemText primary={option} />
+                    </li>
+                  )}
+                  sx={{
+                    '& .MuiAutocomplete-popupIndicator': {
+                      color: 'rgba(255, 255, 255, 0.8)',
+                    },
+                    '& .MuiAutocomplete-clearIndicator': {
+                      color: 'rgba(255, 255, 255, 0.8)',
+                    },
+                    '& .MuiAutocomplete-tag': {
+                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      color: 'white',
+                      fontWeight: 500,
+                    },
+                    '& .MuiAutocomplete-option': {
+                      '&:hover': {
+                        background: 'rgba(102, 126, 234, 0.1)',
                       },
-                      '&:hover fieldset': {
-                        borderColor: 'rgba(102, 126, 234, 0.5)',
-                      },
-                      '&.Mui-focused fieldset': {
-                        borderColor: '#667eea',
+                      '&.Mui-selected': {
+                        background: 'rgba(102, 126, 234, 0.2)',
+                        '&:hover': {
+                          background: 'rgba(102, 126, 234, 0.3)',
+                        },
                       },
                     },
                   }}
-                >
-                  <InputLabel sx={{ color: '#667eea', fontWeight: 500 }}>쿠폰발행자 선택</InputLabel>
-                  <Select
-                    multiple
-                    value={tempSelectedOwners}
-                    onChange={handleTempOwnerChange}
-                    input={<OutlinedInput label="쿠폰발행자 선택" />}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((value) => (
-                          <Chip 
-                            key={value} 
-                            label={value} 
-                            size="small"
-                            onDelete={handleTempOwnerDelete(value)}
-                            onMouseDown={(event) => {
-                              event.stopPropagation();
-                            }}
-                            sx={{
-                              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                              color: 'white',
-                              fontWeight: 500,
-                              '& .MuiChip-deleteIcon': {
-                                color: 'rgba(255, 255, 255, 0.8)',
-                                fontSize: '16px',
-                                '&:hover': {
-                                  color: 'white',
-                                },
-                              },
-                            }}
-                          />
-                        ))}
-                      </Box>
-                    )}
-                    MenuProps={{
-                      PaperProps: {
-                        style: {
-                          maxHeight: 300,
-                          background: 'rgba(255, 255, 255, 0.95)',
-                          backdropFilter: 'blur(15px)',
-                          borderRadius: '12px',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                        },
-                      },
-                    }}
-                  >
-                    {availableOwners.length === 0 ? (
-                      <MenuItem disabled sx={{ 
-                        justifyContent: 'center',
-                        fontStyle: 'italic',
-                        color: '#999'
-                      }}>
-                        쿠폰발행자 데이터를 불러오는 중...
-                      </MenuItem>
-                    ) : (
-                      availableOwners.map((owner) => (
-                        <MenuItem 
-                          key={owner} 
-                          value={owner}
-                          sx={{
-                            '&:hover': {
-                              background: 'rgba(102, 126, 234, 0.1)',
-                            },
-                            '&.Mui-selected': {
-                              background: 'rgba(102, 126, 234, 0.2)',
-                              '&:hover': {
-                                background: 'rgba(102, 126, 234, 0.3)',
-                              },
-                            },
-                          }}
-                        >
-                          <Checkbox 
-                            checked={tempSelectedOwners.indexOf(owner) > -1}
-                            sx={{
-                              color: '#667eea',
-                              '&.Mui-checked': {
-                                color: '#667eea',
-                              },
-                            }}
-                          />
-                          <ListItemText primary={owner} />
-                        </MenuItem>
-                      ))
-                    )}
-                  </Select>
-                </FormControl>
+                />
 
                 {tempSelectedOwners.length > 0 && (
                   <Box sx={{ 

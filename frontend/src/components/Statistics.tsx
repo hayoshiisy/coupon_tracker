@@ -167,6 +167,57 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
     };
   };
 
+  // 매장별로 쿠폰 그룹화하는 함수
+  const groupCouponsByStore = () => {
+    if (!statistics?.coupon_statistics || !statistics?.store_coupon_names) {
+      return {};
+    }
+
+    const groupedCoupons: { [storeName: string]: any[] } = {};
+
+    // 각 매장별로 쿠폰 목록을 가져와서 해당 쿠폰의 통계를 찾아서 그룹화
+    Object.entries(statistics.store_coupon_names).forEach(([storeName, couponNames]) => {
+      groupedCoupons[storeName] = [];
+      
+      (couponNames as string[]).forEach(couponName => {
+        const couponStat = statistics.coupon_statistics.find(stat => stat.name === couponName);
+        if (couponStat) {
+          groupedCoupons[storeName].push(couponStat);
+        }
+      });
+    });
+
+    return groupedCoupons;
+  };
+
+  // 전체 통계 계산 함수
+  const calculateTotalStats = () => {
+    if (!statistics?.coupon_statistics) {
+      return {
+        totalIssued: 0,
+        totalRegistered: 0,
+        totalPaymentCompleted: 0,
+        totalRegistrationRate: 0,
+        totalPaymentRate: 0
+      };
+    }
+
+    const totalIssued = statistics.coupon_statistics.reduce((sum, coupon) => sum + coupon.issued_count, 0);
+    const totalRegistered = statistics.coupon_statistics.reduce((sum, coupon) => sum + coupon.registered_users_count, 0);
+    const totalPaymentCompleted = statistics.coupon_statistics.reduce((sum, coupon) => sum + coupon.payment_completed_count, 0);
+    
+    const totalRegistrationRate = totalIssued > 0 ? Math.round((totalRegistered / totalIssued) * 100 * 10) / 10 : 0;
+    const totalPaymentRate = totalIssued > 0 ? Math.round((totalPaymentCompleted / totalIssued) * 100 * 10) / 10 : 0;
+
+    return {
+      totalIssued,
+      totalRegistered,
+      totalPaymentCompleted,
+      totalRegistrationRate,
+      totalPaymentRate
+    };
+  };
+
   if (loading) {
     return (
       <Box 
@@ -221,6 +272,9 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
     );
   }
 
+  const groupedCoupons = groupCouponsByStore();
+  const totalStats = calculateTotalStats();
+
   return (
     <Box>
       {/* 헤더 섹션 */}
@@ -266,78 +320,62 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
         <Box
           sx={{ mb: 2 }}
         >
-          {statistics && (
-            <>
-              <Chip
-                icon={<TrendingUpIcon />}
-                label={`발행수: ${statistics.summary.total_issued_count || 0}개`}
-                sx={{
-                  background: 'rgba(255, 255, 255, 0.3)',
-                  color: '#000000',
-                  fontWeight: 'bold',
-                  mr: 1,
-                  mb: 1,
-                  border: '1px solid rgba(255, 255, 255, 0.5)',
-                }}
-              />
-              <Chip
-                icon={<TrendingUpIcon />}
-                label={`등록유저수: ${statistics.summary.total_registered_users_count || 0}명`}
-                sx={{
-                  background: 'rgba(76, 175, 80, 0.4)',
-                  color: '#FFFFFF',
-                  fontWeight: 'bold',
-                  mr: 1,
-                  mb: 1,
-                  border: '1px solid rgba(76, 175, 80, 0.6)',
-                }}
-              />
-              <Chip
-                icon={<TrendingUpIcon />}
-                label={`결제완료수: ${statistics.summary.total_payment_completed_count || 0}개`}
-                sx={{
-                  background: 'rgba(0, 122, 255, 0.4)',
-                  color: '#FFFFFF',
-                  fontWeight: 'bold',
-                  mr: 1,
-                  mb: 1,
-                  border: '1px solid rgba(0, 122, 255, 0.6)',
-                }}
-              />
-              <Chip
-                icon={<TrendingUpIcon />}
-                label={`등록률: ${statistics.summary.total_registration_rate ?? 
-                  (statistics.summary.total_issued_count > 0 ? 
-                    Math.round((statistics.summary.total_registered_users_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0)}%`}
-                {...getRateChipProps(statistics.summary.total_registration_rate ?? 
-                  (statistics.summary.total_issued_count > 0 ? 
-                    Math.round((statistics.summary.total_registered_users_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0))}
-                sx={{
-                  ...getRateChipProps(statistics.summary.total_registration_rate ?? 
-                    (statistics.summary.total_issued_count > 0 ? 
-                      Math.round((statistics.summary.total_registered_users_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0)).sx,
-                  mr: 1,
-                  mb: 1,
-                }}
-              />
-              <Chip
-                icon={<TrendingUpIcon />}
-                label={`결제율: ${statistics.summary.total_payment_rate ?? 
-                  (statistics.summary.total_issued_count > 0 ? 
-                    Math.round((statistics.summary.total_payment_completed_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0)}%`}
-                {...getRateChipProps(statistics.summary.total_payment_rate ?? 
-                  (statistics.summary.total_issued_count > 0 ? 
-                    Math.round((statistics.summary.total_payment_completed_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0))}
-                sx={{
-                  ...getRateChipProps(statistics.summary.total_payment_rate ?? 
-                    (statistics.summary.total_issued_count > 0 ? 
-                      Math.round((statistics.summary.total_payment_completed_count / statistics.summary.total_issued_count) * 100 * 10) / 10 : 0)).sx,
-                  mr: 1,
-                  mb: 1,
-                }}
-              />
-            </>
-          )}
+          <Chip
+            icon={<TrendingUpIcon />}
+            label={`발행수: ${totalStats.totalIssued}개`}
+            sx={{
+              background: 'rgba(255, 255, 255, 0.3)',
+              color: '#000000',
+              fontWeight: 'bold',
+              mr: 1,
+              mb: 1,
+              border: '1px solid rgba(255, 255, 255, 0.5)',
+            }}
+          />
+          <Chip
+            icon={<TrendingUpIcon />}
+            label={`등록유저수: ${totalStats.totalRegistered}명`}
+            sx={{
+              background: 'rgba(76, 175, 80, 0.4)',
+              color: '#FFFFFF',
+              fontWeight: 'bold',
+              mr: 1,
+              mb: 1,
+              border: '1px solid rgba(76, 175, 80, 0.6)',
+            }}
+          />
+          <Chip
+            icon={<TrendingUpIcon />}
+            label={`결제완료수: ${totalStats.totalPaymentCompleted}개`}
+            sx={{
+              background: 'rgba(0, 122, 255, 0.4)',
+              color: '#FFFFFF',
+              fontWeight: 'bold',
+              mr: 1,
+              mb: 1,
+              border: '1px solid rgba(0, 122, 255, 0.6)',
+            }}
+          />
+          <Chip
+            icon={<TrendingUpIcon />}
+            label={`등록률: ${totalStats.totalRegistrationRate}%`}
+            {...getRateChipProps(totalStats.totalRegistrationRate)}
+            sx={{
+              ...getRateChipProps(totalStats.totalRegistrationRate).sx,
+              mr: 1,
+              mb: 1,
+            }}
+          />
+          <Chip
+            icon={<TrendingUpIcon />}
+            label={`결제율: ${totalStats.totalPaymentRate}%`}
+            {...getRateChipProps(totalStats.totalPaymentRate)}
+            sx={{
+              ...getRateChipProps(totalStats.totalPaymentRate).sx,
+              mr: 1,
+              mb: 1,
+            }}
+          />
         </Box>
       </Paper>
 
@@ -357,74 +395,76 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
         </Alert>
       ) : (
         <>
-          {/* 쿠폰별 통계 */}
-          <GlassAccordion defaultExpanded>
-            <GlassAccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#FFFFFF' }} />}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 'bold',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                }}
-              >
-                <LocalOfferIcon />
-                쿠폰별 통계
-              </Typography>
-            </GlassAccordionSummary>
-            <AccordionDetails sx={{ p: 0 }}>
-              <GlassTableContainer>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>쿠폰명</TableCell>
-                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>발행수</TableCell>
-                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>등록유저수</TableCell>
-                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>결제완료수</TableCell>
-                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>등록률</TableCell>
-                      <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>결제율</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {statistics?.coupon_statistics.map((couponData, index) => {
-                      // 백엔드에서 비율이 없는 경우 프론트엔드에서 계산
-                      const registrationRate = couponData.registration_rate ?? 
-                        (couponData.issued_count > 0 ? 
-                          Math.round((couponData.registered_users_count / couponData.issued_count) * 100 * 10) / 10 : 0);
-                      const paymentRate = couponData.payment_rate ?? 
-                        (couponData.issued_count > 0 ? 
-                          Math.round((couponData.payment_completed_count / couponData.issued_count) * 100 * 10) / 10 : 0);
-                      
-                      return (
-                        <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: 'rgba(255, 255, 255, 0.05)' } }}>
-                          <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>{couponData.name}</TableCell>
-                          <TableCell align="center" sx={{ color: '#FFFFFF' }}>{couponData.issued_count}</TableCell>
-                          <TableCell align="center" sx={{ color: '#4CAF50' }}>{couponData.registered_users_count}</TableCell>
-                          <TableCell align="center" sx={{ color: '#2196F3' }}>{couponData.payment_completed_count}</TableCell>
-                          <TableCell align="center">
-                            <Chip
-                              label={`${registrationRate}%`}
-                              size="small"
-                              {...getRateChipProps(registrationRate)}
-                            />
-                          </TableCell>
-                          <TableCell align="center">
-                            <Chip
-                              label={`${paymentRate}%`}
-                              size="small"
-                              {...getRateChipProps(paymentRate)}
-                            />
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </GlassTableContainer>
-            </AccordionDetails>
-          </GlassAccordion>
+          {/* 매장별 쿠폰 통계 */}
+          {Object.entries(groupedCoupons).map(([storeName, coupons]) => (
+            <GlassAccordion key={storeName} defaultExpanded>
+              <GlassAccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#FFFFFF' }} />}>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 'bold',
+                    color: '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                  }}
+                >
+                  <StoreIcon />
+                  {storeName}
+                </Typography>
+              </GlassAccordionSummary>
+              <AccordionDetails sx={{ p: 0 }}>
+                <GlassTableContainer>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>쿠폰명</TableCell>
+                        <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>발행수</TableCell>
+                        <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>등록유저수</TableCell>
+                        <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>등록률</TableCell>
+                        <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>결제완료수</TableCell>
+                        <TableCell align="center" sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>결제율</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {coupons.map((couponData, index) => {
+                        // 백엔드에서 비율이 없는 경우 프론트엔드에서 계산
+                        const registrationRate = couponData.registration_rate ?? 
+                          (couponData.issued_count > 0 ? 
+                            Math.round((couponData.registered_users_count / couponData.issued_count) * 100 * 10) / 10 : 0);
+                        const paymentRate = couponData.payment_rate ?? 
+                          (couponData.issued_count > 0 ? 
+                            Math.round((couponData.payment_completed_count / couponData.issued_count) * 100 * 10) / 10 : 0);
+                        
+                        return (
+                          <TableRow key={index} sx={{ '&:nth-of-type(odd)': { backgroundColor: 'rgba(255, 255, 255, 0.05)' } }}>
+                            <TableCell sx={{ color: '#FFFFFF', fontWeight: 'bold' }}>{couponData.name}</TableCell>
+                            <TableCell align="center" sx={{ color: '#FFFFFF' }}>{couponData.issued_count}</TableCell>
+                            <TableCell align="center" sx={{ color: '#4CAF50' }}>{couponData.registered_users_count}</TableCell>
+                            <TableCell align="center">
+                              <Chip
+                                label={`${registrationRate}%`}
+                                size="small"
+                                {...getRateChipProps(registrationRate)}
+                              />
+                            </TableCell>
+                            <TableCell align="center" sx={{ color: '#2196F3' }}>{couponData.payment_completed_count}</TableCell>
+                            <TableCell align="center">
+                              <Chip
+                                label={`${paymentRate}%`}
+                                size="small"
+                                {...getRateChipProps(paymentRate)}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </GlassTableContainer>
+              </AccordionDetails>
+            </GlassAccordion>
+          ))}
 
           {/* 지점별 통계 */}
           <GlassAccordion>
@@ -468,60 +508,6 @@ export const Statistics: React.FC<StatisticsProps> = ({ teamId }) => {
                   </TableBody>
                 </Table>
               </GlassTableContainer>
-            </AccordionDetails>
-          </GlassAccordion>
-
-          {/* 지점별 쿠폰명 목록 */}
-          <GlassAccordion>
-            <GlassAccordionSummary expandIcon={<ExpandMoreIcon sx={{ color: '#FFFFFF' }} />}>
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 'bold',
-                  color: '#FFFFFF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1,
-                }}
-              >
-                <StoreIcon />
-                지점별 쿠폰명 목록
-              </Typography>
-            </GlassAccordionSummary>
-            <AccordionDetails sx={{ p: 2 }}>
-              {statistics?.store_coupon_names && Object.entries(statistics.store_coupon_names).map(([storeName, couponNames]) => (
-                <Box key={storeName} sx={{ mb: 3 }}>
-                  <Typography
-                    variant="h6"
-                    sx={{
-                      color: '#FFFFFF',
-                      fontWeight: 'bold',
-                      mb: 1,
-                      borderBottom: '2px solid rgba(255, 255, 255, 0.3)',
-                      pb: 1
-                    }}
-                  >
-                    {storeName}
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {(couponNames as string[]).map((couponName, index) => (
-                      <Chip
-                        key={index}
-                        label={couponName}
-                        sx={{
-                          background: 'rgba(255, 255, 255, 0.2)',
-                          color: '#FFFFFF',
-                          fontWeight: 'bold',
-                          border: '1px solid rgba(255, 255, 255, 0.3)',
-                          '&:hover': {
-                            background: 'rgba(255, 255, 255, 0.3)',
-                          }
-                        }}
-                      />
-                    ))}
-                  </Box>
-                </Box>
-              ))}
             </AccordionDetails>
           </GlassAccordion>
         </>

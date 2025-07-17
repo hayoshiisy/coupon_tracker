@@ -992,7 +992,7 @@ async def get_issuer_coupons(
                 status=coupon.get('status', ''),
                 code=coupon.get('code', ''),
                 standard_price=coupon.get('standard_price', 0),
-                registered_by=coupon.get('owner', ''),
+                registered_by=coupon.get('registered_by', '미등록'),  # PostgreSQL의 실제 등록자
                 additional_info=coupon.get('memo', ''),
                 payment_status=coupon.get('payment_status', '미결제')
             )

@@ -643,10 +643,17 @@ class DatabaseService:
                 a.date_expired as expiry_date,
                 COALESCE(b.name, '알 수 없음') as store_name,
                 COALESCE(c.name, '알 수 없음') as provider_name,
-                COALESCE(a.standard_price, 0) as standard_price
+                COALESCE(a.standard_price, 0) as standard_price,
+                COALESCE(e.name, '미등록') as registered_by,
+                CASE 
+                    WHEN d.is_used = TRUE THEN '결제완료' 
+                    ELSE '미결제' 
+                END as payment_status
             FROM b_payment_bcoupon a
             LEFT JOIN b_class_bplace b ON b.id = a.b_place_id
             LEFT JOIN b_class_bprovider c ON a.b_provider_id = c.id
+            LEFT JOIN b_payment_bcouponuser d ON d.b_coupon_id = a.id
+            LEFT JOIN user_user e ON d.user_id = e.id
             WHERE a.id IN ({coupon_ids_str})
             AND (
                 (a.title LIKE '%패밀리 쿠폰)%' OR a.title LIKE '%프렌즈 쿠폰)%')
@@ -694,6 +701,10 @@ class DatabaseService:
                         else:
                             expiry_date = None
                         
+                        # 디버깅: registered_by 필드 확인
+                        registered_by_from_db = coupon_dict.get('registered_by', '미등록')
+                        logger.info(f"쿠폰 ID {coupon_dict.get('id')}: DB에서 가져온 registered_by = '{registered_by_from_db}'")
+                        
                         coupon = {
                             'id': coupon_dict.get('id'),
                             'status': coupon_dict.get('status', '사용가능'),
@@ -704,7 +715,8 @@ class DatabaseService:
                             'expiration_date': expiry_date,
                             'store': coupon_dict.get('store_name', '알 수 없음'),
                             'provider': coupon_dict.get('provider_name', '알 수 없음'),
-                            'owner': issuer_name,  # 발행자 이름으로 설정
+                            'owner': issuer_name,  # SQLite의 발행자 이름 (쿠폰발행자)
+                            'registered_by': registered_by_from_db,  # PostgreSQL의 실제 등록자 (쿠폰등록회원)
                             'phone': None,
                             'usage_date': None,
                             'memo': '',
@@ -713,9 +725,12 @@ class DatabaseService:
                             'image_url': None,
                             'team_id': 'teamb',
                             'standard_price': coupon_dict.get('standard_price', 0),
-                            'payment_status': '미결제',  # 단순화
-                            'used': False  # 단순화
+                            'payment_status': coupon_dict.get('payment_status', '미결제'),  # 실제 결제 상태
+                            'used': coupon_dict.get('payment_status') == '결제완료'  # 결제완료면 used=True
                         }
+                        
+                        # 디버깅: 최종 쿠폰 객체의 registered_by 확인
+                        logger.info(f"쿠폰 ID {coupon['id']}: 최종 registered_by = '{coupon['registered_by']}'")
                         
                         # 할인 정보 설정
                         if coupon['discount_percent']:

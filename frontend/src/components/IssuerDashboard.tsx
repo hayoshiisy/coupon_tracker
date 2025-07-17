@@ -748,6 +748,17 @@ const IssuerDashboard: React.FC = () => {
                           borderBottom: '2px solid #5a67d8'
                         }}
                       >
+                        쿠폰 등록자
+                      </TableCell>
+                      <TableCell 
+                        sx={{ 
+                          backgroundColor: '#667eea',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '1rem',
+                          borderBottom: '2px solid #5a67d8'
+                        }}
+                      >
                         결제 상태
                       </TableCell>
                     </TableRow>
@@ -860,12 +871,22 @@ const IssuerDashboard: React.FC = () => {
                           <Typography 
                             variant="body2" 
                             sx={{ 
-                              color: '#5a6c7d',
+                              color: '#2c3e50',
                               fontWeight: 'medium'
                             }}
                           >
-                            {coupon.payment_status}
+                            {coupon.registered_by || '알 수 없음'}
                           </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Chip
+                            label={coupon.payment_status || '미결제'}
+                            sx={{
+                              backgroundColor: coupon.payment_status === '결제완료' ? '#4CAF50' : '#ff9800',
+                              color: 'white',
+                              fontWeight: 'bold'
+                            }}
+                          />
                         </TableCell>
                       </TableRow>
                     ))}
