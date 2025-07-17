@@ -983,6 +983,9 @@ async def get_issuer_coupons(
         # 쿠폰 객체로 변환
         coupon_objects = []
         for coupon in coupons:
+            # 디버깅: 원본 데이터 확인
+            logger.info(f"원본 쿠폰 데이터 ID {coupon.get('id')}: registered_by='{coupon.get('registered_by')}', owner='{coupon.get('owner')}'")
+            
             coupon_obj = Coupon(
                 id=coupon.get('id'),
                 name=coupon.get('name', ''),
@@ -996,6 +999,10 @@ async def get_issuer_coupons(
                 additional_info=coupon.get('memo', ''),
                 payment_status=coupon.get('payment_status', '미결제')
             )
+            
+            # 디버깅: 최종 쿠폰 객체 확인
+            logger.info(f"최종 쿠폰 객체 ID {coupon_obj.id}: registered_by='{coupon_obj.registered_by}'")
+            
             coupon_objects.append(coupon_obj)
         
         return PaginatedCoupons(
