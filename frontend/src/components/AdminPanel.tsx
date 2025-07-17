@@ -104,6 +104,11 @@ const AdminPanel: React.FC = () => {
         fetchIssuers();
         setOpenDialog(false);
         setFormData({ name: '', email: '', phone: '' });
+        
+        // CouponList에 변경사항 알림
+        localStorage.setItem('issuerListUpdated', Date.now().toString());
+        // 같은 탭에서도 즉시 적용되도록 custom event 발생
+        window.dispatchEvent(new CustomEvent('issuerListUpdated'));
       } else {
         const errorData = await response.json();
         setSnackbar({
@@ -144,6 +149,11 @@ const AdminPanel: React.FC = () => {
         setOpenDialog(false);
         setSelectedIssuer(null);
         setFormData({ name: '', email: '', phone: '' });
+        
+        // CouponList에 변경사항 알림
+        localStorage.setItem('issuerListUpdated', Date.now().toString());
+        // 같은 탭에서도 즉시 적용되도록 custom event 발생
+        window.dispatchEvent(new CustomEvent('issuerListUpdated'));
       } else {
         const errorData = await response.json();
         setSnackbar({
@@ -177,6 +187,11 @@ const AdminPanel: React.FC = () => {
             severity: 'success'
           });
           fetchIssuers();
+          
+          // CouponList에 변경사항 알림
+          localStorage.setItem('issuerListUpdated', Date.now().toString());
+          // 같은 탭에서도 즉시 적용되도록 custom event 발생
+          window.dispatchEvent(new CustomEvent('issuerListUpdated'));
         } else {
           const errorData = await response.json();
           setSnackbar({

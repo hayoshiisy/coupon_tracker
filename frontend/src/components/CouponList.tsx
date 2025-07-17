@@ -223,6 +223,47 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
     }
   }, []);
 
+  // AdminPanel에서 발행자 변경사항을 감지하기 위한 useEffect 추가
+  useEffect(() => {
+    if (teamId === 'teamb') {
+      // 쿠폰발행자 목록을 주기적으로 새로고침 (30초마다)
+      const interval = setInterval(() => {
+        loadOwnerNames();
+      }, 30000);
+
+      // storage 이벤트 리스너 추가 (다른 탭에서 변경사항 감지)
+      const handleStorageChange = (e: StorageEvent) => {
+        if (e.key === 'issuerListUpdated') {
+          loadOwnerNames();
+          // 한 번 사용 후 삭제
+          localStorage.removeItem('issuerListUpdated');
+        }
+      };
+
+      // custom event 리스너 추가 (같은 탭에서 변경사항 감지)
+      const handleCustomEvent = () => {
+        loadOwnerNames();
+      };
+
+      window.addEventListener('storage', handleStorageChange);
+      window.addEventListener('issuerListUpdated', handleCustomEvent);
+
+      // 컴포넌트가 활성화될 때마다 새로고침 (포커스 이벤트)
+      const handleFocus = () => {
+        loadOwnerNames();
+      };
+
+      window.addEventListener('focus', handleFocus);
+
+      return () => {
+        clearInterval(interval);
+        window.removeEventListener('storage', handleStorageChange);
+        window.removeEventListener('issuerListUpdated', handleCustomEvent);
+        window.removeEventListener('focus', handleFocus);
+      };
+    }
+  }, [teamId, loadOwnerNames]);
+
   const fetchCouponsData = useCallback(async () => {
     setLoading(true);
     setError(null);
