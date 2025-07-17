@@ -1,0 +1,11 @@
+frontend/
+node_modules/
+.git/
+.github/
+*.md
+.env.local
+.env.development
+.env.test
+.vercel/
+build/
+dist/ 
