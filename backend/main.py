@@ -986,6 +986,34 @@ async def get_issuer_coupons(
             # 디버깅: 원본 데이터 확인
             logger.info(f"원본 쿠폰 데이터 ID {coupon.get('id')}: registered_by='{coupon.get('registered_by')}', owner='{coupon.get('owner')}'")
             
+            # registered_by 필드 강제 수정 - PostgreSQL에서 직접 조회
+            coupon_id = coupon.get('id')
+            actual_registered_by = '미등록'  # 기본값
+            
+            try:
+                conn = db_service.get_connection()
+                cursor = conn.cursor()
+                
+                # PostgreSQL에서 실제 등록자 정보 직접 조회
+                direct_query = """
+                SELECT COALESCE(e.name, '미등록') as actual_registered_by
+                FROM b_payment_bcoupon a
+                LEFT JOIN b_payment_bcouponuser d ON d.b_coupon_id = a.id
+                LEFT JOIN user_user e ON d.user_id = e.id
+                WHERE a.id = %s
+                """
+                cursor.execute(direct_query, (coupon_id,))
+                result = cursor.fetchone()
+                
+                if result:
+                    actual_registered_by = result[0]
+                    logger.info(f"쿠폰 ID {coupon_id}: PostgreSQL에서 직접 조회한 registered_by = '{actual_registered_by}'")
+                
+                conn.close()
+                
+            except Exception as e:
+                logger.error(f"쿠폰 ID {coupon_id} 등록자 직접 조회 실패: {e}")
+            
             coupon_obj = Coupon(
                 id=coupon.get('id'),
                 name=coupon.get('name', ''),
@@ -995,7 +1023,7 @@ async def get_issuer_coupons(
                 status=coupon.get('status', ''),
                 code=coupon.get('code', ''),
                 standard_price=coupon.get('standard_price', 0),
-                registered_by=coupon.get('registered_by', '미등록'),  # PostgreSQL의 실제 등록자
+                registered_by=actual_registered_by,  # PostgreSQL에서 직접 조회한 실제 등록자
                 additional_info=coupon.get('memo', ''),
                 payment_status=coupon.get('payment_status', '미결제')
             )
