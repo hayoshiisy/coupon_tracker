@@ -8,4 +8,7 @@ node_modules/
 .env.test
 .vercel/
 build/
-dist/ 
+dist/
+package.json.disabled
+package-lock.json
+yarn.lock 

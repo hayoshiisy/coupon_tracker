@@ -1,12 +1,7 @@
 [build]
 builder = "nixpacks"
-
-[build.nixpacks]
-configPath = "backend/nixpacks.toml"
+nixpacksConfigPath = "backend/nixpacks.toml"
 
 [deploy]
-startCommand = "cd backend && python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
-healthcheckPath = "/health"
-healthcheckTimeout = 300
-restartPolicyType = "on_failure"
-restartPolicyMaxRetries = 3 
+startCommand = "cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
+healthcheckPath = "/health" 
