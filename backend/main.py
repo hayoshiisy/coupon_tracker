@@ -992,7 +992,7 @@ async def get_issuer_coupons(
                 status=coupon.get('status', ''),
                 code=coupon.get('code', ''),
                 standard_price=coupon.get('standard_price', 0),
-                registered_by='미등록',  # 임시로 하드코딩하여 문제 해결
+                registered_by=coupon.get('registered_by', '미등록'),  # 데이터베이스에서 가져온 실제 등록자명 사용
                 additional_info=coupon.get('memo', ''),
                 payment_status=coupon.get('payment_status', '미결제')
             )
