@@ -715,7 +715,6 @@ class DatabaseService:
                             'expiration_date': expiry_date,
                             'store': coupon_dict.get('store_name', '알 수 없음'),
                             'provider': coupon_dict.get('provider_name', '알 수 없음'),
-                            'owner': issuer_name,  # SQLite의 발행자 이름 (쿠폰발행자)
                             'registered_by': registered_by_from_db,  # PostgreSQL의 실제 등록자 (쿠폰등록회원)
                             'phone': None,
                             'usage_date': None,
