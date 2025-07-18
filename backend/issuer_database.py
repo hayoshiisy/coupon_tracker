@@ -16,11 +16,29 @@ class IssuerDatabaseService:
             data_dir = '/app/data'
             os.makedirs(data_dir, exist_ok=True)
             self.db_path = os.path.join(data_dir, 'issuer_database.db')
+            logger.info(f"Railway 환경 감지 - Volume 경로 사용: {self.db_path}")
         else:
             # 로컬 환경에서는 기존 경로 사용
             self.db_path = os.path.join(os.path.dirname(__file__), 'issuer_database.db')
+            logger.info(f"로컬 환경 - 기본 경로 사용: {self.db_path}")
         
-        logger.info(f"SQLite 데이터베이스 경로: {self.db_path}")
+        # 디렉토리 권한 및 존재 확인
+        try:
+            db_dir = os.path.dirname(self.db_path)
+            if not os.path.exists(db_dir):
+                os.makedirs(db_dir, exist_ok=True)
+                logger.info(f"데이터베이스 디렉토리 생성: {db_dir}")
+            
+            # 쓰기 권한 확인
+            if os.access(db_dir, os.W_OK):
+                logger.info(f"데이터베이스 디렉토리 쓰기 권한 확인: {db_dir}")
+            else:
+                logger.warning(f"데이터베이스 디렉토리 쓰기 권한 없음: {db_dir}")
+                
+        except Exception as e:
+            logger.error(f"데이터베이스 디렉토리 확인 실패: {e}")
+        
+        logger.info(f"SQLite 데이터베이스 최종 경로: {self.db_path}")
         self.create_tables()
     
     def get_connection(self):
