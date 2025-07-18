@@ -10,7 +10,17 @@ logger = logging.getLogger(__name__)
 
 class IssuerDatabaseService:
     def __init__(self):
-        self.db_path = os.path.join(os.path.dirname(__file__), 'issuer_database.db')
+        # Railway Volume 경로 또는 로컬 경로 설정
+        if os.getenv('RAILWAY_ENVIRONMENT'):
+            # Railway 환경에서는 /app/data 디렉토리 사용
+            data_dir = '/app/data'
+            os.makedirs(data_dir, exist_ok=True)
+            self.db_path = os.path.join(data_dir, 'issuer_database.db')
+        else:
+            # 로컬 환경에서는 기존 경로 사용
+            self.db_path = os.path.join(os.path.dirname(__file__), 'issuer_database.db')
+        
+        logger.info(f"SQLite 데이터베이스 경로: {self.db_path}")
         self.create_tables()
     
     def get_connection(self):
