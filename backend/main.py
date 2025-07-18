@@ -19,6 +19,29 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="쿠폰 트래커 API", version="2.0.0")
 
+# Railway 환경 및 SQLite 경로 확인을 위한 엔드포인트 추가
+@app.get("/api/debug/env")
+async def debug_environment():
+    """Railway 환경 및 SQLite 설정 확인 (디버깅용)"""
+    import os
+    from issuer_database import issuer_db_service
+    
+    env_info = {
+        "railway_environment": os.getenv('RAILWAY_ENVIRONMENT'),
+        "railway_environment_name": os.getenv('RAILWAY_ENVIRONMENT_NAME'),
+        "railway_service_name": os.getenv('RAILWAY_SERVICE_NAME'),
+        "sqlite_db_path": issuer_db_service.db_path,
+        "sqlite_db_exists": os.path.exists(issuer_db_service.db_path),
+        "sqlite_db_dir": os.path.dirname(issuer_db_service.db_path),
+        "sqlite_db_dir_exists": os.path.exists(os.path.dirname(issuer_db_service.db_path)),
+        "sqlite_db_writable": os.access(os.path.dirname(issuer_db_service.db_path), os.W_OK),
+        "current_working_directory": os.getcwd(),
+        "app_data_exists": os.path.exists('/app/data'),
+        "app_data_writable": os.access('/app/data', os.W_OK) if os.path.exists('/app/data') else False
+    }
+    
+    return env_info
+
 # 환경 변수에서 CORS origins 가져오기
 cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 cors_origins = [origin.strip() for origin in cors_origins]
