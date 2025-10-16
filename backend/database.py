@@ -269,8 +269,10 @@ class DatabaseService:
                 coupon_ids = [dict(zip(columns, row)).get('id') for row in results]
                 try:
                     issuer_mapping = issuer_db_service.get_coupon_id_to_issuer_map([cid for cid in coupon_ids if cid])
+                    logging.info(f"발행자 매핑 조회 완료: {len(issuer_mapping)}개 매핑")
                 except Exception as e:
                     logging.warning(f"발행자 정보 조회 실패: {e}")
+                    issuer_mapping = {}
             
             coupons = []
             for row in results:
