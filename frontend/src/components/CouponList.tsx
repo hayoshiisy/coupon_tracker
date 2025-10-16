@@ -245,28 +245,23 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
       window.addEventListener('storage', handleStorageChange);
       window.addEventListener('issuerListUpdated', handleCustomEvent);
 
-      // 컴포넌트가 활성화될 때마다 새로고침 (포커스 이벤트)
-      const handleFocus = () => {
-        loadOwnerNames();
-      };
-
-      window.addEventListener('focus', handleFocus);
-
       return () => {
         window.removeEventListener('storage', handleStorageChange);
         window.removeEventListener('issuerListUpdated', handleCustomEvent);
-        window.removeEventListener('focus', handleFocus);
       };
     }
-  }, [teamId, loadOwnerNames]);
+  }, [teamId]); // loadOwnerNames 의존성 제거
 
   const fetchCouponsData = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      // 선택된 발행자 이름들을 이메일로 변환
-      const selectedIssuerEmails = selectedOwners.map(name => ownerNameToEmailMap[name]).filter(email => email);
+      // 선택된 발행자 이름들을 이메일로 변환 (현재 상태 기반)
+      const selectedIssuerEmails = selectedOwners.map(name => {
+        // 현재 ownerNameToEmailMap에서 찾거나, 직접 매핑 시도
+        return ownerNameToEmailMap[name] || name;
+      }).filter(email => email && email.includes('@'));
 
       const data: PaginatedCoupons = await fetchCoupons(
         currentPage,
