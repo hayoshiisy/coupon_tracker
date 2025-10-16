@@ -1155,6 +1155,35 @@ async def fix_issuer_names():
         logger.error(f"발행자 이름 수정 실패: {e}")
         raise HTTPException(status_code=500, detail=f"수정 실패: {str(e)}")
 
+@app.post("/api/admin/export-issuer-data")
+async def export_issuer_data():
+    """발행자 데이터 CSV 추출 엔드포인트 (관리자용)"""
+    try:
+        import subprocess
+        import sys
+        
+        # 데이터 추출 스크립트 실행
+        result = subprocess.run([
+            sys.executable, "export_issuer_data.py"
+        ], capture_output=True, text=True, cwd=".")
+        
+        if result.returncode == 0:
+            return {
+                "status": "success",
+                "message": "발행자 데이터 추출이 완료되었습니다.",
+                "output": result.stdout
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "발행자 데이터 추출 중 오류가 발생했습니다.",
+                "error": result.stderr
+            }
+            
+    except Exception as e:
+        logger.error(f"발행자 데이터 추출 실패: {e}")
+        raise HTTPException(status_code=500, detail=f"추출 실패: {str(e)}")
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port) 
