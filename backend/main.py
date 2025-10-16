@@ -1184,6 +1184,64 @@ async def export_issuer_data():
         logger.error(f"발행자 데이터 추출 실패: {e}")
         raise HTTPException(status_code=500, detail=f"추출 실패: {str(e)}")
 
+@app.post("/api/admin/add-final-issuers")
+async def add_final_issuers():
+    """최종 발행자 5명 추가 엔드포인트 (관리자용)"""
+    try:
+        import subprocess
+        import sys
+        
+        # 발행자 추가 스크립트 실행
+        result = subprocess.run([
+            sys.executable, "add_final_issuers.py"
+        ], capture_output=True, text=True, cwd=".")
+        
+        if result.returncode == 0:
+            return {
+                "status": "success",
+                "message": "최종 발행자 5명 추가가 완료되었습니다.",
+                "output": result.stdout
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "최종 발행자 추가 중 오류가 발생했습니다.",
+                "error": result.stderr
+            }
+            
+    except Exception as e:
+        logger.error(f"최종 발행자 추가 실패: {e}")
+        raise HTTPException(status_code=500, detail=f"추가 실패: {str(e)}")
+
+@app.post("/api/admin/add-final-mappings")
+async def add_final_mappings():
+    """최종 쿠폰 매핑 추가 엔드포인트 (관리자용)"""
+    try:
+        import subprocess
+        import sys
+        
+        # 매핑 추가 스크립트 실행
+        result = subprocess.run([
+            sys.executable, "add_final_mappings.py"
+        ], capture_output=True, text=True, cwd=".")
+        
+        if result.returncode == 0:
+            return {
+                "status": "success",
+                "message": "최종 쿠폰 매핑 추가가 완료되었습니다.",
+                "output": result.stdout
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "최종 쿠폰 매핑 추가 중 오류가 발생했습니다.",
+                "error": result.stderr
+            }
+            
+    except Exception as e:
+        logger.error(f"최종 쿠폰 매핑 추가 실패: {e}")
+        raise HTTPException(status_code=500, detail=f"매핑 추가 실패: {str(e)}")
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port) 
