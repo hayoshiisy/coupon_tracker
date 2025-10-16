@@ -171,8 +171,8 @@ def main():
     """메인 실행 함수"""
     try:
         # CSV 파일 경로
-        issuers_csv = "coupon_issuers.csv"
-        mappings_csv = "coupon_issuer_mapping.csv"
+        issuers_csv = "production_issuers.csv"
+        mappings_csv = "production_mappings.csv"
         
         # 파일 존재 확인
         if not os.path.exists(issuers_csv):
