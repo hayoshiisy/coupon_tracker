@@ -1097,6 +1097,35 @@ async def add_recent_issuers():
         logger.error(f"최근 발행자 데이터 복구 실패: {e}")
         raise HTTPException(status_code=500, detail=f"복구 실패: {str(e)}")
 
+@app.post("/api/admin/restore-log-data")
+async def restore_log_data():
+    """로그에서 복구된 발행자 데이터 복구 엔드포인트 (관리자용)"""
+    try:
+        import subprocess
+        import sys
+        
+        # 로그 데이터 복구 스크립트 실행
+        result = subprocess.run([
+            sys.executable, "restore_log_data.py"
+        ], capture_output=True, text=True, cwd=".")
+        
+        if result.returncode == 0:
+            return {
+                "status": "success",
+                "message": "로그에서 복구된 발행자 데이터 복구가 완료되었습니다.",
+                "output": result.stdout
+            }
+        else:
+            return {
+                "status": "error",
+                "message": "로그에서 복구된 발행자 데이터 복구 중 오류가 발생했습니다.",
+                "error": result.stderr
+            }
+            
+    except Exception as e:
+        logger.error(f"로그 데이터 복구 실패: {e}")
+        raise HTTPException(status_code=500, detail=f"복구 실패: {str(e)}")
+
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))
     uvicorn.run(app, host="0.0.0.0", port=port) 
