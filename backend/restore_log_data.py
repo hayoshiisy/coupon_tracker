@@ -144,8 +144,8 @@ def main():
     """메인 실행 함수"""
     try:
         # CSV 파일 경로
-        issuers_csv = "log_recovered_issuers.csv"
-        mappings_csv = "log_recovered_mappings.csv"
+        issuers_csv = "final_new_issuers.csv"
+        mappings_csv = "final_new_mappings.csv"
         
         # 파일 존재 확인
         if not os.path.exists(issuers_csv):
