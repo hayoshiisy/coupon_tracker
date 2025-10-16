@@ -141,6 +141,8 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
   const [availableOwners, setAvailableOwners] = useState<string[]>([]);
   const [selectedOwners, setSelectedOwners] = useState<string[]>([]);
   const [tempSelectedOwners, setTempSelectedOwners] = useState<string[]>([]);
+  // 발행자 미지정 필터
+  const [onlyUnassigned, setOnlyUnassigned] = useState<boolean>(false);
   
   // 이름-이메일 매핑을 위한 상태 추가
   const [ownerNameToEmailMap, setOwnerNameToEmailMap] = useState<{[name: string]: string}>({});
@@ -279,7 +281,8 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
         selectedCouponNames.length > 0 ? selectedCouponNames.join(',') : undefined,
         selectedStores.length > 0 ? selectedStores.join(',') : undefined,
         teamId,
-        selectedIssuerEmails.length > 0 ? selectedIssuerEmails.join(',') : undefined
+        selectedIssuerEmails.length > 0 ? selectedIssuerEmails.join(',') : undefined,
+        onlyUnassigned || undefined
       );
 
       setData(data);
@@ -290,7 +293,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchTerm, selectedCouponNames, selectedStores, teamId, selectedOwners, ownerNameToEmailMap]);
+  }, [currentPage, searchTerm, selectedCouponNames, selectedStores, teamId, selectedOwners, ownerNameToEmailMap, onlyUnassigned]);
 
   useEffect(() => {
     loadCouponNames();
@@ -690,13 +693,20 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                   onChange={handleSearchInputChange}
                   onKeyPress={handleSearchKeyPress}
                   InputProps={{
-                    startAdornment: <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />,
+                    startAdornment: <SearchIcon sx={{ mr: 1, color: '#A1A1A1' }} />,
+                    sx: {
+                      '& .MuiInputBase-input': {
+                        color: '#A1A1A1',
+                        '::placeholder': { color: '#A1A1A1', opacity: 1 }
+                      }
+                    }
                   }}
                   sx={{
                     '& .MuiOutlinedInput-root': {
                       background: 'rgba(255, 255, 255, 0.8)',
                       backdropFilter: 'blur(10px)',
                       borderRadius: '12px',
+                      '& .MuiOutlinedInput-input': { color: '#0D0D0E' },
                       '&:hover': {
                         background: 'rgba(255, 255, 255, 0.9)',
                       },
@@ -723,7 +733,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
               </Box>
               <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
                 <FormControl fullWidth>
-                  <InputLabel>쿠폰명 필터</InputLabel>
+                  <InputLabel sx={{ color: '#A1A1A1', '&.Mui-focused': { color: '#A1A1A1' } }}>쿠폰명 필터</InputLabel>
                   <Select
                     multiple
                     value={tempSelectedCouponNames}
@@ -738,6 +748,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                       '& .MuiSelect-select': {
                         background: 'rgba(255, 255, 255, 0.8)',
                         backdropFilter: 'blur(10px)',
+                        color: '#0D0D0E'
                       },
                     }}
                   >
@@ -958,20 +969,8 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                   display: 'flex', 
                   alignItems: 'center', 
                   mb: 2,
-                  justifyContent: 'space-between'
+                  justifyContent: 'flex-end'
                 }}>
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      fontWeight: 600,
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      backgroundClip: 'text',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    쿠폰발행자 선택
-                  </Typography>
                   {tempSelectedOwners.length > 0 && (
                     <Button
                       variant="outlined"
@@ -1009,12 +1008,12 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="쿠폰발행자 선택"
-                      placeholder="쿠폰발행자 검색"
+                      placeholder="쿠폰발행자 선택"
+                      InputLabelProps={{ shrink: false }}
                       InputProps={{
                         ...params.InputProps,
                         startAdornment: (
-                          <SearchIcon sx={{ mr: 1, color: 'text.secondary' }} />
+                          <SearchIcon sx={{ mr: 1, color: '#A1A1A1' }} />
                         ),
                         endAdornment: (
                           <>
@@ -1026,6 +1025,12 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                             {params.InputProps.endAdornment}
                           </>
                         ),
+                        sx: {
+                          '& .MuiInputBase-input': {
+                            color: '#A1A1A1',
+                            '::placeholder': { color: '#A1A1A1', opacity: 1 }
+                          }
+                        }
                       }}
                       sx={{
                         '& .MuiOutlinedInput-root': {
@@ -1041,6 +1046,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                           '&.Mui-focused fieldset': {
                             borderColor: '#667eea',
                           },
+                          '& .MuiOutlinedInput-input': { color: '#1a1a1a' }
                         },
                       }}
                     />
@@ -1156,7 +1162,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
             )}
             
             {/* 필터 적용 및 초기화 버튼 */}
-            {(tempSelectedCouponNames.length > 0 || tempSelectedStores.length > 0 || (teamId === 'teamb' && tempSelectedOwners.length > 0)) && (
+            {(tempSelectedCouponNames.length > 0 || tempSelectedStores.length > 0 || (teamId === 'teamb' && (tempSelectedOwners.length > 0 || onlyUnassigned))) && (
               <Box sx={{ display: 'flex', gap: 2, mt: 2, justifyContent: 'center' }}>
                 <Button
                   variant="contained"
@@ -1196,7 +1202,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
             )}
 
             {/* 현재 적용된 필터 표시 */}
-            {(selectedCouponNames.length > 0 || selectedStores.length > 0 || (teamId === 'teamb' && selectedOwners.length > 0)) && (
+            {(selectedCouponNames.length > 0 || selectedStores.length > 0 || (teamId === 'teamb' && (selectedOwners.length > 0 || onlyUnassigned))) && (
               <Box sx={{ 
                 mb: 3,
                 p: 2,
@@ -1312,25 +1318,24 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     </Box>
                   </Box>
                 )}
+                {teamId === 'teamb' && onlyUnassigned && (
+                  <Box sx={{ mt: selectedOwners.length > 0 ? 1 : 0 }}>
+                    <Chip 
+                      label="발행자 미지정만" 
+                      size="small"
+                      sx={{
+                        background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
+                        color: 'white',
+                        fontWeight: 500,
+                        fontSize: '0.75rem'
+                      }}
+                    />
+                  </Box>
+                )}
               </Box>
             )}
 
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography 
-                variant="body2" 
-                sx={{ 
-                  color: 'rgba(0, 0, 0, 0.7)',
-                  fontWeight: 500
-                }}
-              >
-                총 {filteredCoupons.length.toLocaleString()}개 쿠폰
-                {teamId === 'teamb' && selectedOwners.length > 0 && filteredCoupons.length !== data.total && (
-                  <span style={{ color: '#667eea', marginLeft: '8px' }}>
-                    (전체: {data.total.toLocaleString()}개)
-                  </span>
-                )}
-              </Typography>
-            </Box>
+            {/* 총 쿠폰 수 표시 제거 */}
           </Stack>
         </CardContent>
       </GlassCard>
@@ -1342,15 +1347,99 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
               <TableCell sx={{ minWidth: 80, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>ID</TableCell>
               <TableCell sx={{ minWidth: 120, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>상태</TableCell>
               <TableCell sx={{ minWidth: 250, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>쿠폰명</TableCell>
-              <TableCell sx={{ minWidth: 100, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>할인</TableCell>
-              <TableCell sx={{ minWidth: 150, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>지점</TableCell>
+              {teamId !== 'teamb' && (
+                <TableCell sx={{ minWidth: 100, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>할인</TableCell>
+              )}
+              {teamId !== 'teamb' && (
+                <TableCell sx={{ minWidth: 150, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>지점</TableCell>
+              )}
               <TableCell sx={{ minWidth: 120, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>만료일</TableCell>
               <TableCell sx={{ minWidth: 120, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>쿠폰코드</TableCell>
               {teamId !== "teamb" && (
                 <TableCell sx={{ minWidth: 120, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>정가</TableCell>
               )}
               {teamId !== "timberland" && (
-                <TableCell sx={{ minWidth: 120, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>쿠폰발행자</TableCell>
+                <TableCell sx={{ minWidth: 230, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <span>쿠폰발행자</span>
+                    {teamId === 'teamb' && (
+                      <>
+                        <Button
+                          variant={onlyUnassigned ? 'contained' : 'outlined'}
+                          size="small"
+                          onClick={() => setOnlyUnassigned(prev => !prev)}
+                          sx={{
+                            borderColor: onlyUnassigned ? 'transparent' : 'rgba(102, 126, 234, 0.5)',
+                            background: onlyUnassigned 
+                              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
+                              : 'rgba(255, 255, 255, 0.08)',
+                            color: onlyUnassigned ? 'white' : '#e0e0e0',
+                            fontWeight: onlyUnassigned ? 600 : 500,
+                            px: 1.2,
+                            py: 0.2,
+                            borderRadius: '10px',
+                            textTransform: 'none',
+                            lineHeight: 1.2,
+                            '&:hover': {
+                              background: onlyUnassigned 
+                                ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)' 
+                                : 'rgba(255, 255, 255, 0.16)'
+                            }
+                          }}
+                        >
+                          미지정만
+                        </Button>
+                        {onlyUnassigned && (
+                        <Button
+                          variant="contained"
+                          size="small"
+                          onClick={async () => {
+                            // 일괄 등록 처리
+                            const pending = Object.entries(editingOwner)
+                              .filter(([couponId, value]) => !!value && value.trim() !== '')
+                              .map(([couponId, value]) => ({ id: Number(couponId), email: value.trim() }));
+                            if (pending.length === 0) {
+                              setSnackbar({ open: true, message: '등록할 항목이 없습니다.', severity: 'info' });
+                              return;
+                            }
+                            setLoading(true);
+                            let success = 0, fail = 0;
+                            for (const item of pending) {
+                              try {
+                                const res = await fetch(`${API_BASE_URL}/api/coupons/${item.id}/assign-issuer`, {
+                                  method: 'PATCH',
+                                  headers: { 'Content-Type': 'application/json' },
+                                  body: JSON.stringify({ issuer_email: item.email, issuer_name: item.email.split('@')[0] })
+                                });
+                                if (!res.ok) throw new Error('assign failed');
+                                success += 1;
+                              } catch (e) {
+                                console.error('bulk assign failed', item, e);
+                                fail += 1;
+                              }
+                            }
+                            setSnackbar({ open: true, message: `모두 등록 완료: 성공 ${success}건, 실패 ${fail}건`, severity: fail ? 'warning' : 'success' });
+                            setEditingOwner({});
+                            await fetchCouponsData();
+                            setLoading(false);
+                          }}
+                          sx={{
+                            background: 'linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%)',
+                            ml: 1,
+                            textTransform: 'none',
+                            lineHeight: 1.2,
+                            px: 1.2,
+                            py: 0.2,
+                            borderRadius: '10px'
+                          }}
+                        >
+                          모두 등록
+                        </Button>
+                        )}
+                      </>
+                    )}
+                  </Box>
+                </TableCell>
               )}
               <TableCell sx={{ minWidth: 120, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>쿠폰등록자</TableCell>
               <TableCell sx={{ minWidth: 120, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>결제상태</TableCell>
@@ -1392,29 +1481,33 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     {coupon.name}
                   </Typography>
                 </TableCell>
-                <TableCell>
-                  <Chip 
-                    label={coupon.discount || '-'} 
-                    variant="outlined" 
-                    size="small"
-                    sx={{
-                      borderColor: 'rgba(255, 255, 255, 0.4)',
-                      color: '#FFFFFF',
-                      background: 'rgba(102, 126, 234, 0.3)',
-                      fontWeight: 700,
-                      fontSize: '0.85rem',
-                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
-                      '& .MuiChip-label': {
+                {teamId !== 'teamb' && (
+                  <TableCell>
+                    <Chip 
+                      label={coupon.discount || '-'} 
+                      variant="outlined" 
+                      size="small"
+                      sx={{
+                        borderColor: 'rgba(255, 255, 255, 0.4)',
                         color: '#FFFFFF',
-                      },
-                    }}
-                  />
-                </TableCell>
-                <TableCell>
-                  <Typography variant="body2" sx={{ color: '#FFFFFF', fontSize: '0.95rem', textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)' }}>
-                    {coupon.store}
-                  </Typography>
-                </TableCell>
+                        background: 'rgba(102, 126, 234, 0.3)',
+                        fontWeight: 700,
+                        fontSize: '0.85rem',
+                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                        '& .MuiChip-label': {
+                          color: '#FFFFFF',
+                        },
+                      }}
+                    />
+                  </TableCell>
+                )}
+                {teamId !== 'teamb' && (
+                  <TableCell>
+                    <Typography variant="body2" sx={{ color: '#FFFFFF', fontSize: '0.95rem', textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)' }}>
+                      {coupon.store}
+                    </Typography>
+                  </TableCell>
+                )}
                 <TableCell>
                   <Typography variant="body2" sx={{ color: '#FFFFFF', fontSize: '0.95rem', textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)' }}>
                     {formatDate(coupon.expiration_date)}
@@ -1502,7 +1595,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                             '& .MuiInputBase-input': {
                               padding: '4px 8px',
                               fontSize: '14px',
-                              color: '#FFFFFF'
+                              color: '#0D0D0E'
                             },
                             '& .MuiOutlinedInput-root': {
                               backgroundColor: 'rgba(255, 255, 255, 0.1)',
@@ -1667,6 +1760,8 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
               background: 'rgba(255, 255, 255, 0.8)',
               backdropFilter: 'blur(10px)',
               border: '1px solid rgba(102, 126, 234, 0.2)',
+              color: '#1a1a1a',
+              fontWeight: 600,
               '&:hover': {
                 background: 'rgba(102, 126, 234, 0.1)',
               },

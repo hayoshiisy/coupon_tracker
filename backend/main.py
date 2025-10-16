@@ -185,6 +185,7 @@ async def get_api_coupons(
     coupon_names: str = Query(None, description="쿠폰명 필터 (쉼표로 구분)"),
     store_names: str = Query(None, description="지점명 필터 (쉼표로 구분)"),
     issuer: str = Query(None, description="발행자 이메일 필터"),
+    unassigned: bool = Query(False, description="발행자 미지정만 조회"),
     page: int = Query(1, ge=1, description="페이지 번호"),
     size: int = Query(100, ge=1, le=1000, description="페이지 크기"),
     team_id: str = Query(None, description="팀 ID")
@@ -208,7 +209,8 @@ async def get_api_coupons(
             search=search,
             coupon_names=coupon_name_list,
             store_names=store_name_list,
-            issuer=issuer
+            issuer=issuer,
+            unassigned=unassigned
         )
         
         logger.info(f"팀 {team_id} - 페이지 {page}/{result['total_pages']} 조회: {len(result['coupons'])}개 쿠폰 (전체: {result['total']}개)")
@@ -499,6 +501,7 @@ async def get_team_coupons(
     coupon_names: str = Query(None, description="쿠폰명 필터 (쉼표로 구분)"),
     store_names: str = Query(None, description="지점명 필터 (쉼표로 구분)"),
     issuer: str = Query(None, description="발행자 이메일 필터"),
+    unassigned: bool = Query(False, description="발행자 미지정만 조회"),
     page: int = Query(1, ge=1, description="페이지 번호"),
     size: int = Query(100, ge=1, le=1000, description="페이지 크기")
 ):
@@ -521,7 +524,8 @@ async def get_team_coupons(
             search=search,
             coupon_names=coupon_name_list,
             store_names=store_name_list,
-            issuer=issuer
+            issuer=issuer,
+            unassigned=unassigned
         )
         
         logger.info(f"팀 {team_id} - 페이지 {page}/{result['total_pages']} 조회: {len(result['coupons'])}개 쿠폰 (전체: {result['total']}개)")

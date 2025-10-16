@@ -151,7 +151,8 @@ export const fetchCoupons = async (
   couponNames?: string,
   storeNames?: string,
   teamId?: string,
-  issuer?: string
+  issuer?: string,
+  unassigned?: boolean
 ): Promise<PaginatedCoupons> => {
   const params = new URLSearchParams();
   params.append('page', page.toString());
@@ -161,6 +162,7 @@ export const fetchCoupons = async (
   if (couponNames) params.append('coupon_names', couponNames);
   if (storeNames) params.append('store_names', storeNames);
   if (issuer) params.append('issuer', issuer);
+  if (unassigned) params.append('unassigned', 'true');
   
   let url: string;
   if (teamId) {

@@ -11,17 +11,30 @@ logger = logging.getLogger(__name__)
 
 class IssuerDatabaseService:
     def __init__(self):
-        # Railway PostgreSQL 연결 정보
+        # PostgreSQL 연결 정보 (없거나 연결 실패 시 비활성화 모드)
         self.database_url = os.getenv('DATABASE_URL')
+        self.disabled = False
+        # 간단한 인메모리 저장소 (비활성화 모드에서 사용)
+        self._memory_mapping = {}  # coupon_id -> issuer_email
+        self._memory_issuers = {}  # email -> {name, phone}
+
         if not self.database_url:
-            raise ValueError("DATABASE_URL 환경 변수가 설정되지 않았습니다.")
-        
+            self.disabled = True
+            logger.warning("발행자 DB 비활성화: DATABASE_URL 미설정. 발행자 기능 없이 동작합니다.")
+            return
+
         logger.info(f"PostgreSQL 데이터베이스 연결: {self.database_url[:50]}...")
-        self.create_tables()
+        try:
+            self.create_tables()
+        except Exception as e:
+            self.disabled = True
+            logger.error(f"테이블 생성 실패: {e}. 발행자 기능 비활성화 모드로 전환합니다.")
     
     def get_connection(self):
         """PostgreSQL 데이터베이스 연결을 반환합니다."""
         try:
+            if self.disabled:
+                raise RuntimeError("발행자 DB 비활성화 모드")
             conn = psycopg2.connect(self.database_url)
             return conn
         except Exception as e:
@@ -74,6 +87,10 @@ class IssuerDatabaseService:
     def save_issuer_info(self, name: str, email: str, phone: str = None) -> bool:
         """발행자 정보를 저장하거나 업데이트합니다."""
         try:
+            if self.disabled:
+                # 인메모리에 저장
+                self._memory_issuers[email] = {"name": name, "email": email, "phone": phone}
+                return True
             conn = self.get_connection()
             cursor = conn.cursor()
             
@@ -112,6 +129,11 @@ class IssuerDatabaseService:
     def assign_coupon_to_issuer(self, name: str, coupon_id: int, email: str, phone: str = None) -> bool:
         """쿠폰을 발행자에게 할당합니다."""
         try:
+            if self.disabled:
+                # 인메모리 매핑 기록
+                self._memory_issuers[email] = {"name": name, "email": email, "phone": phone}
+                self._memory_mapping[coupon_id] = email
+                return True
             # 먼저 발행자 정보 저장/업데이트
             self.save_issuer_info(name, email, phone)
             
@@ -150,6 +172,19 @@ class IssuerDatabaseService:
     def get_all_issuers(self) -> List[Dict]:
         """모든 발행자와 할당된 쿠폰 수를 조회합니다."""
         try:
+            if self.disabled:
+                # 인메모리 목록 반환
+                issuers = []
+                for email, info in self._memory_issuers.items():
+                    count = sum(1 for cid, em in self._memory_mapping.items() if em == email)
+                    issuers.append({
+                        'name': info.get('name') or email,
+                        'email': email,
+                        'phone': info.get('phone'),
+                        'created_at': None,
+                        'coupon_count': count
+                    })
+                return issuers
             conn = self.get_connection()
             cursor = conn.cursor(cursor_factory=RealDictCursor)
             
@@ -179,6 +214,8 @@ class IssuerDatabaseService:
     def get_assigned_coupon_ids(self, issuer_email: str) -> List[int]:
         """특정 발행자에게 할당된 쿠폰 ID 목록을 조회합니다."""
         try:
+            if self.disabled:
+                return [cid for cid, em in self._memory_mapping.items() if em == issuer_email]
             conn = self.get_connection()
             cursor = conn.cursor()
             
@@ -200,6 +237,12 @@ class IssuerDatabaseService:
     def delete_issuer(self, issuer_email: str) -> bool:
         """발행자를 삭제합니다. (관련 쿠폰 할당도 함께 삭제)"""
         try:
+            if self.disabled:
+                # 인메모리에서 제거
+                if issuer_email in self._memory_issuers:
+                    del self._memory_issuers[issuer_email]
+                self._memory_mapping = {cid: em for cid, em in self._memory_mapping.items() if em != issuer_email}
+                return True
             conn = self.get_connection()
             cursor = conn.cursor()
             
@@ -221,6 +264,12 @@ class IssuerDatabaseService:
     def test_connection(self) -> Dict:
         """데이터베이스 연결 및 테이블 존재 여부를 테스트합니다."""
         try:
+            if self.disabled:
+                return {
+                    'status': 'disabled',
+                    'database_type': 'PostgreSQL',
+                    'reason': 'DATABASE_URL not set or connection failed'
+                }
             conn = self.get_connection()
             cursor = conn.cursor()
             
@@ -256,6 +305,47 @@ class IssuerDatabaseService:
                 'status': 'error',
                 'error': str(e)
             }
+
+    # 확장: 여러 이메일의 할당 쿠폰 ID 집합 반환
+    def get_assigned_coupon_ids_for_emails(self, emails: List[str]) -> List[int]:
+        ids: List[int] = []
+        for email in emails:
+            ids.extend(self.get_assigned_coupon_ids(email))
+        # 중복 제거
+        return list(dict.fromkeys(ids))
+
+    # 확장: 특정 쿠폰 ID 목록에 대한 email 매핑 반환
+    def get_coupon_id_to_issuer_map(self, coupon_ids: List[int]) -> Dict[int, str]:
+        if self.disabled:
+            return {cid: self._memory_mapping.get(cid) for cid in coupon_ids if cid in self._memory_mapping}
+        try:
+            if not coupon_ids:
+                return {}
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            placeholders = ','.join(['%s'] * len(coupon_ids))
+            cursor.execute(f"SELECT coupon_id, issuer_email FROM coupon_issuer_mapping WHERE coupon_id IN ({placeholders})", tuple(coupon_ids))
+            results = cursor.fetchall()
+            conn.close()
+            return {row[0]: row[1] for row in results}
+        except Exception as e:
+            logger.error(f"쿠폰 발행자 매핑 조회 실패: {e}")
+            return {}
+
+    # 확장: 모든 할당된 쿠폰 ID 집합 반환
+    def get_all_assigned_coupon_ids(self) -> List[int]:
+        if self.disabled:
+            return list(self._memory_mapping.keys())
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT DISTINCT coupon_id FROM coupon_issuer_mapping")
+            ids = [row[0] for row in cursor.fetchall()]
+            conn.close()
+            return ids
+        except Exception as e:
+            logger.error(f"모든 할당 쿠폰 조회 실패: {e}")
+            return []
 
 # 전역 서비스 인스턴스
 issuer_db_service = IssuerDatabaseService() 

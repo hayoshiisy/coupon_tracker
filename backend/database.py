@@ -31,41 +31,21 @@ class DatabaseService:
     
     def get_coupons_from_db(self, team_id: str = None, page: int = 1, size: int = 100, 
                            search: str = None, coupon_names: List[str] = None, 
-                           store_names: List[str] = None, issuer: str = None) -> Dict[str, Any]:
+                           store_names: List[str] = None, issuer: str = None, 
+                           unassigned: bool = False) -> Dict[str, Any]:
         try:
             connection = self.get_connection()
             cursor = connection.cursor()
             
-            # 발행자 필터링이 있는 경우, 먼저 해당 발행자의 쿠폰 ID들을 조회
+            # 발행자 필터링이 있는 경우, 해당 발행자 이메일들의 쿠폰 ID 목록을 조회
             issuer_coupon_ids = None
             if issuer:
                 try:
                     logging.info(f"=== 발행자 필터링 시작: {issuer} ===")
-                    # 이미 import된 issuer_db_service 사용
-                    conn_sqlite = issuer_db_service.get_connection()
-                    cursor_sqlite = conn_sqlite.cursor()
-                    
-                    # 쉼표로 구분된 여러 발행자 이메일 처리
-                    issuer_emails = [email.strip() for email in issuer.split(',')]
-                    placeholders = ','.join(['?' for _ in issuer_emails])
-                    
-                    # 발행자 이메일로 할당된 쿠폰 ID들 조회
-                    sqlite_query = f"""
-                        SELECT coupon_id FROM coupon_issuer_mapping 
-                        WHERE issuer_email IN ({placeholders})
-                    """
-                    logging.info(f"SQLite 쿼리: {sqlite_query}")
-                    logging.info(f"SQLite 파라미터: {issuer_emails}")
-                    
-                    cursor_sqlite.execute(sqlite_query, issuer_emails)
-                    issuer_coupon_ids = [row[0] for row in cursor_sqlite.fetchall()]
-                    conn_sqlite.close()
-                    
-                    logging.info(f"발행자 '{issuer}'에게 할당된 쿠폰 ID: {issuer_coupon_ids}")
-                    
-                    # 할당된 쿠폰이 없으면 빈 결과 반환
+                    issuer_emails = [email.strip() for email in issuer.split(',') if email.strip()]
+                    issuer_coupon_ids = issuer_db_service.get_assigned_coupon_ids_for_emails(issuer_emails)
+                    logging.info(f"발행자 '{issuer}' 할당 쿠폰 ID: {issuer_coupon_ids}")
                     if not issuer_coupon_ids:
-                        logging.info(f"발행자 '{issuer}'에게 할당된 쿠폰이 없습니다.")
                         return {
                             'coupons': [],
                             'total': 0,
@@ -104,6 +84,17 @@ class DatabaseService:
                 placeholders = ','.join(['%s'] * len(issuer_coupon_ids))
                 additional_filters.append(f"a.id IN ({placeholders})")
                 params.extend(issuer_coupon_ids)
+            
+            # 미지정(발행자 없음) 필터링: 발행자 매핑에 없는 쿠폰만
+            if unassigned:
+                try:
+                    assigned_coupon_ids = issuer_db_service.get_all_assigned_coupon_ids()
+                    if assigned_coupon_ids:
+                        placeholders = ','.join(['%s'] * len(assigned_coupon_ids))
+                        additional_filters.append(f"a.id NOT IN ({placeholders})")
+                        params.extend(assigned_coupon_ids)
+                except Exception as e:
+                    logging.warning(f"미지정 필터 적용 중 매핑 조회 실패: {e}")
             
             # 검색어 필터링
             if search:
@@ -272,36 +263,14 @@ class DatabaseService:
                 columns = [desc[0] for desc in cursor.description]
                 results = cursor.fetchall()
             
-            # SQLite에서 발행자 정보 조회 (한 번에 가져오기)
+            # 발행자 정보 조회 (한 번에 가져오기)
             issuer_mapping = {}
             if results:
-                # 이미 import된 issuer_db_service 사용
-                
-                # 조회된 쿠폰 ID들 수집
                 coupon_ids = [dict(zip(columns, row)).get('id') for row in results]
-                
-                # SQLite에서 해당 쿠폰들의 발행자 정보 조회
                 try:
-                    conn_sqlite = issuer_db_service.get_connection()
-                    cursor_sqlite = conn_sqlite.cursor()
-                    
-                    if coupon_ids:
-                        coupon_ids_str = ','.join(map(str, coupon_ids))
-                        sqlite_query = f"""
-                        SELECT cim.coupon_id, cim.issuer_email 
-                        FROM coupon_issuer_mapping cim
-                        WHERE cim.coupon_id IN ({coupon_ids_str})
-                        """
-                        cursor_sqlite.execute(sqlite_query)
-                        sqlite_results = cursor_sqlite.fetchall()
-                        
-                        # 쿠폰 ID별 발행자 이메일 매핑 생성
-                        for coupon_id, issuer_email in sqlite_results:
-                            issuer_mapping[coupon_id] = issuer_email
-                    
-                    conn_sqlite.close()
+                    issuer_mapping = issuer_db_service.get_coupon_id_to_issuer_map([cid for cid in coupon_ids if cid])
                 except Exception as e:
-                    logging.warning(f"SQLite 발행자 정보 조회 실패: {e}")
+                    logging.warning(f"발행자 정보 조회 실패: {e}")
             
             coupons = []
             for row in results:
