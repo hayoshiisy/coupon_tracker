@@ -1,9 +1,6 @@
 {
-  "buildCommand": "npm run build",
-  "installCommand": "npm install --prefix frontend",
+  "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/build",
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "https://honest-nurturing-production.up.railway.app/api/$1" },
-    { "source": "/(.*)", "destination": "/frontend/build/$1" }
-  ]
+  "installCommand": "cd frontend && npm install",
+  "framework": "create-react-app"
 }
