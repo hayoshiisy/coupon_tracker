@@ -1,21 +1,9 @@
 {
-  "buildCommand": "cd frontend && npm run build",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install --prefix frontend",
   "outputDirectory": "frontend/build",
-  "installCommand": "cd frontend && npm install",
-  "framework": "create-react-app",
-  "routes": [
-    {
-      "src": "/static/(.*)",
-      "headers": {
-        "cache-control": "s-maxage=31536000,immutable"
-      }
-    },
-    {
-      "handle": "filesystem"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
-    }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "https://honest-nurturing-production.up.railway.app/api/$1" },
+    { "source": "/(.*)", "destination": "/frontend/build/$1" }
   ]
 }
