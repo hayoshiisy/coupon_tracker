@@ -263,7 +263,7 @@ class IssuerDatabaseService:
     
     def unassign_coupon_from_issuer(self, coupon_id: int) -> bool:
         """특정 쿠폰에서 발행자 할당을 해제합니다."""
-        if self.disabled_mode:
+        if self.disabled:
             logging.warning("IssuerDatabaseService가 비활성화 모드입니다. 쿠폰 발행자 할당 해제를 건너뜁니다.")
             return False
         

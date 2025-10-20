@@ -28,6 +28,18 @@ class DatabaseService:
         except Exception as e:
             logger.error(f"데이터베이스 연결 실패: {e}")
             raise
+
+    def check_coupon_exists(self, coupon_id: int) -> bool:
+        """해당 쿠폰 ID가 원본 쿠폰 DB에 존재하는지 확인합니다."""
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cursor:
+                    cursor.execute("SELECT 1 FROM b_payment_bcoupon WHERE id = %s LIMIT 1", (coupon_id,))
+                    return cursor.fetchone() is not None
+        except Exception as e:
+            logger.warning(f"쿠폰 존재 여부 확인 실패 (id={coupon_id}): {e}")
+            # 연결 오류 시에도 삭제 API는 계속 진행할 수 있도록 False 반환
+            return False
     
     def get_coupons_from_db(self, team_id: str = None, page: int = 1, size: int = 100, 
                            search: str = None, coupon_names: List[str] = None, 

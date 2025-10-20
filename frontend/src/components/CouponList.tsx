@@ -525,6 +525,16 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
           });
 
           if (response.ok) {
+            // 해당 행만 부분 갱신 (전체 리패치 대신)
+            setData(prev => {
+              if (!prev) return prev as any;
+              return {
+                ...prev,
+                coupons: prev.coupons.map(c =>
+                  c.id === couponId ? { ...c, issuer: trimmedOwnerName } : c
+                )
+              };
+            });
             setSnackbar({ 
               open: true, 
               message: `쿠폰이 발행자 '${trimmedOwnerName}'에게 성공적으로 할당되었습니다.`, 
@@ -596,6 +606,17 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
         throw new Error(errorData.detail || '발행자 할당 해제에 실패했습니다.');
       }
 
+      // 해당 행만 부분 갱신: issuer를 즉시 비우기
+      setData(prev => {
+        if (!prev) return prev as any;
+        return {
+          ...prev,
+          coupons: prev.coupons.map(c =>
+            c.id === couponId ? { ...c, issuer: '' } : c
+          )
+        };
+      });
+
       // 새로운 소유자 정보 객체 생성 (해당 쿠폰 소유자 삭제)
       const newCouponOwners = { ...couponOwners };
       delete newCouponOwners[couponId];
@@ -618,7 +639,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
       console.error('쿠폰 발행자 할당 해제 실패:', error);
       setSnackbar({
         open: true,
-        message: `쿠폰 발행자 할당 해제에 실패했습니다: ${error.message}`,
+        message: `쿠폰 발행자 할당 해제에 실패했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`,
         severity: 'error'
       });
     }
