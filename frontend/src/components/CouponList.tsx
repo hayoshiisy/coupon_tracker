@@ -581,8 +581,21 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
     });
   };
 
-  const handleDeleteOwner = (couponId: number) => {
+  const handleDeleteOwner = async (couponId: number) => {
     try {
+      // 백엔드 API 호출하여 발행자 할당 해제
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/coupons/${couponId}/issuer`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || '발행자 할당 해제에 실패했습니다.');
+      }
+
       // 새로운 소유자 정보 객체 생성 (해당 쿠폰 소유자 삭제)
       const newCouponOwners = { ...couponOwners };
       delete newCouponOwners[couponId];
@@ -593,16 +606,19 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
       // 로컬스토리지에서 삭제
       saveCouponOwnersToLocalStorage(newCouponOwners);
 
+      // 쿠폰 데이터 새로고침
+      await fetchCouponsData();
+
       setSnackbar({
         open: true,
-        message: '쿠폰 소유자가 삭제되었습니다.',
+        message: '쿠폰 발행자 할당이 해제되었습니다.',
         severity: 'success'
       });
     } catch (error) {
-      console.error('쿠폰 소유자 삭제 실패:', error);
+      console.error('쿠폰 발행자 할당 해제 실패:', error);
       setSnackbar({
         open: true,
-        message: '쿠폰 소유자 삭제에 실패했습니다.',
+        message: `쿠폰 발행자 할당 해제에 실패했습니다: ${error.message}`,
         severity: 'error'
       });
     }

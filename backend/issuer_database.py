@@ -261,6 +261,37 @@ class IssuerDatabaseService:
             logger.error(f"발행자 삭제 실패: {e}")
             return False
     
+    def unassign_coupon_from_issuer(self, coupon_id: int) -> bool:
+        """특정 쿠폰에서 발행자 할당을 해제합니다."""
+        if self.disabled_mode:
+            logging.warning("IssuerDatabaseService가 비활성화 모드입니다. 쿠폰 발행자 할당 해제를 건너뜁니다.")
+            return False
+        
+        try:
+            conn = self.get_connection()
+            cursor = conn.cursor()
+            
+            # 매핑 존재 확인
+            cursor.execute("SELECT id FROM coupon_issuer_mapping WHERE coupon_id = %s", (coupon_id,))
+            mapping = cursor.fetchone()
+            
+            if not mapping:
+                logging.warning(f"쿠폰 {coupon_id}에 할당된 발행자가 없습니다.")
+                conn.close()
+                return False
+            
+            # 매핑 삭제
+            cursor.execute("DELETE FROM coupon_issuer_mapping WHERE coupon_id = %s", (coupon_id,))
+            conn.commit()
+            conn.close()
+            
+            logging.info(f"쿠폰 {coupon_id}의 발행자 할당이 해제되었습니다.")
+            return True
+            
+        except Exception as e:
+            logging.error(f"쿠폰 {coupon_id} 발행자 할당 해제 실패: {e}")
+            return False
+    
     def test_connection(self) -> Dict:
         """데이터베이스 연결 및 테이블 존재 여부를 테스트합니다."""
         try:

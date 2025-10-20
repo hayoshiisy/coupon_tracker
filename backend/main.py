@@ -812,6 +812,30 @@ async def update_issuer(issuer_email: str, update_data: dict):
         logger.error(f"발행자 정보 수정 실패: {e}")
         raise HTTPException(status_code=500, detail="발행자 정보 수정에 실패했습니다.")
 
+@app.delete("/api/coupons/{coupon_id}/issuer")
+async def unassign_coupon_issuer(coupon_id: int):
+    """쿠폰에서 발행자 할당을 해제합니다."""
+    try:
+        # 쿠폰 존재 확인
+        coupon_exists = db_service.check_coupon_exists(coupon_id)
+        if not coupon_exists:
+            raise HTTPException(status_code=404, detail="쿠폰을 찾을 수 없습니다.")
+        
+        # 발행자 매핑 삭제
+        success = issuer_db_service.unassign_coupon_from_issuer(coupon_id)
+        
+        if success:
+            logger.info(f"쿠폰 {coupon_id}의 발행자 할당이 해제되었습니다.")
+            return {"message": f"쿠폰 {coupon_id}의 발행자 할당이 해제되었습니다."}
+        else:
+            raise HTTPException(status_code=404, detail="해당 쿠폰에 할당된 발행자가 없습니다.")
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"쿠폰 발행자 할당 해제 실패: {e}")
+        raise HTTPException(status_code=500, detail="쿠폰 발행자 할당 해제에 실패했습니다.")
+
 @app.delete("/api/issuers/{issuer_email}")
 async def delete_issuer(issuer_email: str):
     """발행자를 삭제합니다."""
