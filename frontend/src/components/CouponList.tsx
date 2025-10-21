@@ -1175,7 +1175,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
             )}
 
             {/* 총 쿠폰 수 표시 제거 */}
-          </Stack>
+          </Box>
         </CardContent>
       </GlassCard>
 
