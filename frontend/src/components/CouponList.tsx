@@ -664,19 +664,20 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
 
   return (
     <Box sx={{ p: 3 }}>
-
-            {/* Vercel 스타일 필터 영역 */}
+      <GlassCard sx={{ mb: 3 }}>
+        <CardContent>
+          {/* Vercel 스타일 필터 영역 */}
             <Box sx={{ 
               display: 'flex', 
               gap: 2, 
               flexWrap: 'wrap',
-              alignItems: 'center',
-              p: 2,
-              background: 'rgba(255, 255, 255, 0.6)',
-              backdropFilter: 'blur(15px)',
-              borderRadius: '16px',
-              border: '1px solid rgba(255, 255, 255, 0.3)'
-            }}>
+            alignItems: 'center',
+            p: 2,
+            background: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(15px)',
+            borderRadius: '16px',
+            border: '1px solid rgba(255, 255, 255, 0.3)'
+          }}>
               {/* 검색 필터 */}
               <Box sx={{ 
                 flex: '1 1 300px', 
@@ -774,10 +775,10 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     ))}
                   </Select>
                 </FormControl>
-              </Box>
-
+            </Box>
+            
               {/* 지점 필터 (teamb가 아닌 경우) */}
-              {teamId !== 'teamb' && (
+            {teamId !== 'teamb' && (
                 <Box sx={{ flex: '1 1 150px', minWidth: '150px' }}>
                   <FormControl fullWidth size="small">
                     <Select
@@ -815,57 +816,57 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     >
                       {storeNames.map((store) => (
                         <MenuItem key={store} value={store}>
-                          {store}
+                      {store}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
-                </Box>
-              )}
-
+              </Box>
+            )}
+            
               {/* 발행자 필터 (teamb인 경우) */}
-              {teamId === 'teamb' && (
+            {teamId === 'teamb' && (
                 <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
-                  <Autocomplete
-                    multiple
-                    options={availableOwners}
-                    value={tempSelectedOwners}
-                    onChange={(event, newValue) => {
-                      setTempSelectedOwners(newValue);
-                    }}
+                <Autocomplete
+                  multiple
+                  options={availableOwners}
+                  value={tempSelectedOwners}
+                  onChange={(event, newValue) => {
+                    setTempSelectedOwners(newValue);
+                  }}
                     size="small"
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
                         placeholder="발행자 필터"
                         InputLabelProps={{ shrink: false }}
-                        sx={{
-                          '& .MuiOutlinedInput-root': {
+                      sx={{
+                        '& .MuiOutlinedInput-root': {
                             background: 'rgba(255, 255, 255, 0.9)',
                             borderRadius: '8px',
-                            '& fieldset': {
+                          '& fieldset': {
                               borderColor: 'rgba(0, 0, 0, 0.1)',
-                            },
-                            '&:hover fieldset': {
+                          },
+                          '&:hover fieldset': {
                               borderColor: 'rgba(0, 0, 0, 0.2)',
-                            },
-                            '&.Mui-focused fieldset': {
+                          },
+                          '&.Mui-focused fieldset': {
                               borderColor: '#0070f3',
-                            },
+                          },
                             '& .MuiOutlinedInput-input': { 
                               color: '#333',
                               fontSize: '14px',
                               py: 1
                             }
-                          },
-                        }}
-                      />
-                    )}
-                    renderTags={(tagValue, getTagProps) =>
-                      tagValue.map((option, index) => (
-                      <Chip 
-                          label={option}
-                          {...getTagProps({ index })}
+                        },
+                      }}
+                    />
+                  )}
+                  renderTags={(tagValue, getTagProps) =>
+                    tagValue.map((option, index) => (
+                      <Chip
+                        label={option}
+                        {...getTagProps({ index })}
                         size="small"
                         sx={{
                             background: '#0070f3',
@@ -875,11 +876,11 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                           '& .MuiChip-deleteIcon': {
                             color: 'rgba(255, 255, 255, 0.8)',
                               fontSize: '14px',
-                            },
-                          }}
-                        />
-                      ))
-                    }
+                          },
+                        }}
+                      />
+                    ))
+                  }
                   />
                 </Box>
               )}
@@ -891,7 +892,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     variant={onlyUnassigned ? 'contained' : 'outlined'}
                     size="small"
                     onClick={() => setOnlyUnassigned(prev => !prev)}
-                    sx={{
+                        sx={{
                       borderColor: onlyUnassigned ? 'transparent' : 'rgba(0, 0, 0, 0.2)',
                       background: onlyUnassigned ? '#0070f3' : 'rgba(255, 255, 255, 0.9)',
                       color: onlyUnassigned ? 'white' : '#333',
@@ -916,14 +917,14 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                   variant="contained"
                   size="small"
                   onClick={handleApplyFilters}
-                  sx={{ 
+                  sx={{
                     background: '#0070f3',
                     borderRadius: '8px',
                     textTransform: 'none',
-                    fontWeight: 500,
+                      fontWeight: 500,
                     px: 2,
                     py: 1,
-                    '&:hover': {
+                      '&:hover': {
                       background: '#0051cc',
                     },
                   }}
@@ -956,50 +957,50 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
 
             {/* 선택된 필터 표시 */}
             {(tempSelectedCouponNames.length > 0 || tempSelectedStores.length > 0 || (teamId === 'teamb' && tempSelectedOwners.length > 0)) && (
-              <Box sx={{ 
-                mt: 2,
+                  <Box sx={{ 
+                    mt: 2,
                 p: 2,
                 background: 'rgba(0, 112, 243, 0.1)',
-                borderRadius: '12px',
+                    borderRadius: '12px',
                 border: '1px solid rgba(0, 112, 243, 0.2)'
-              }}>
-                <Typography 
-                  variant="body2" 
-                  sx={{ 
+                  }}>
+                    <Typography 
+                      variant="body2" 
+                      sx={{ 
                     color: '#0070f3', 
-                    fontWeight: 500, 
+                        fontWeight: 500, 
                     mb: 1,
                     fontSize: '14px'
-                  }}
-                >
+                      }}
+                    >
                   선택된 필터:
-                </Typography>
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {tempSelectedCouponNames.map((name) => (
-                    <Chip
+                        <Chip
                       key={name}
                       label={name}
-                      size="small"
+                          size="small"
                       onDelete={handleTempChipDelete(name)}
-                      sx={{
+                          sx={{
                         background: '#0070f3',
-                        color: 'white',
+                            color: 'white',
                         fontSize: '12px',
                         height: '24px',
-                        '& .MuiChip-deleteIcon': {
-                          color: 'rgba(255, 255, 255, 0.8)',
+                            '& .MuiChip-deleteIcon': {
+                              color: 'rgba(255, 255, 255, 0.8)',
                           fontSize: '14px',
-                        },
-                      }}
-                    />
-                  ))}
+                            },
+                          }}
+                        />
+                      ))}
                   {tempSelectedStores.map((store) => (
                     <Chip
                       key={store}
                       label={store}
                       size="small"
                       onDelete={() => handleTempStoreClick(store)}
-                      sx={{
+                  sx={{ 
                         background: '#0070f3',
                         color: 'white',
                         fontSize: '12px',
@@ -1017,7 +1018,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                       label={owner}
                       size="small"
                       onDelete={() => handleTempOwnerDelete(owner)}
-                      sx={{
+                  sx={{ 
                         background: '#0070f3',
                         color: 'white',
                         fontSize: '12px',
@@ -1161,7 +1162,7 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     <Chip 
                       label="발행자 미지정만" 
                       size="small"
-                      sx={{
+                      sx={{ 
                         background: '#0070f3',
                         color: 'white',
                         fontWeight: 500,
@@ -1171,11 +1172,10 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     />
                   </Box>
                 )}
-              </Box>
+            </Box>
             )}
 
             {/* 총 쿠폰 수 표시 제거 */}
-          </Box>
         </CardContent>
       </GlassCard>
 
@@ -1201,77 +1201,54 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                 <TableCell sx={{ minWidth: 230, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <span>쿠폰발행자</span>
-                    {teamId === 'teamb' && (
-                      <>
-                        <Button
-                          variant={onlyUnassigned ? 'contained' : 'outlined'}
-                          size="small"
-                          onClick={() => setOnlyUnassigned(prev => !prev)}
-                          sx={{
-                            borderColor: onlyUnassigned ? 'transparent' : 'rgba(255, 255, 255, 0.3)',
-                            background: onlyUnassigned ? '#0070f3' : 'rgba(255, 255, 255, 0.1)',
-                            color: onlyUnassigned ? 'white' : 'rgba(255, 255, 255, 0.8)',
-                            fontWeight: 500,
-                            px: 1.5,
-                            py: 0.5,
-                            borderRadius: '8px',
-                            textTransform: 'none',
-                            fontSize: '12px',
-                            '&:hover': {
-                              background: onlyUnassigned ? '#0051cc' : 'rgba(255, 255, 255, 0.2)',
+                    {teamId === 'teamb' && onlyUnassigned && (
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={async () => {
+                          // 일괄 등록 처리
+                          const pending = Object.entries(editingOwner)
+                            .filter(([couponId, value]) => !!value && value.trim() !== '')
+                            .map(([couponId, value]) => ({ id: Number(couponId), email: value.trim() }));
+                          if (pending.length === 0) {
+                            setSnackbar({ open: true, message: '등록할 항목이 없습니다.', severity: 'info' });
+                            return;
+                          }
+                          setLoading(true);
+                          let success = 0, fail = 0;
+                          for (const item of pending) {
+                            try {
+                              const res = await fetch(`${API_BASE_URL}/api/coupons/${item.id}/assign-issuer`, {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ issuer_email: item.email, issuer_name: item.email.split('@')[0] })
+                              });
+                              if (!res.ok) throw new Error('assign failed');
+                              success += 1;
+                            } catch (e) {
+                              console.error('bulk assign failed', item, e);
+                              fail += 1;
                             }
-                          }}
-                        >
-                          미지정만
-                        </Button>
-                        {onlyUnassigned && (
-                        <Button
-                          variant="contained"
-                          size="small"
-                          onClick={async () => {
-                            // 일괄 등록 처리
-                            const pending = Object.entries(editingOwner)
-                              .filter(([couponId, value]) => !!value && value.trim() !== '')
-                              .map(([couponId, value]) => ({ id: Number(couponId), email: value.trim() }));
-                            if (pending.length === 0) {
-                              setSnackbar({ open: true, message: '등록할 항목이 없습니다.', severity: 'info' });
-                              return;
-                            }
-                            setLoading(true);
-                            let success = 0, fail = 0;
-                            for (const item of pending) {
-                              try {
-                                const res = await fetch(`${API_BASE_URL}/api/coupons/${item.id}/assign-issuer`, {
-                                  method: 'PATCH',
-                                  headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify({ issuer_email: item.email, issuer_name: item.email.split('@')[0] })
-                                });
-                                if (!res.ok) throw new Error('assign failed');
-                                success += 1;
-                              } catch (e) {
-                                console.error('bulk assign failed', item, e);
-                                fail += 1;
-                              }
-                            }
-                            setSnackbar({ open: true, message: `모두 등록 완료: 성공 ${success}건, 실패 ${fail}건`, severity: fail ? 'warning' : 'success' });
-                            setEditingOwner({});
-                            await fetchCouponsData();
-                            setLoading(false);
-                          }}
-                          sx={{
-                            background: 'linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%)',
-                            ml: 1,
-                            textTransform: 'none',
-                            lineHeight: 1.2,
-                            px: 1.2,
-                            py: 0.2,
-                            borderRadius: '10px'
-                          }}
-                        >
-                          모두 등록
-                        </Button>
-                        )}
-                      </>
+                          }
+                          setSnackbar({ open: true, message: `모두 등록 완료: 성공 ${success}건, 실패 ${fail}건`, severity: fail ? 'warning' : 'success' });
+                          setEditingOwner({});
+                          await fetchCouponsData();
+                          setLoading(false);
+                        }}
+                        sx={{
+                          background: 'linear-gradient(135deg, #4CAF50 0%, #2e7d32 100%)',
+                          ml: 1,
+                          textTransform: 'none',
+                          lineHeight: 1.2,
+                          px: 1.2,
+                          py: 0.2,
+                          borderRadius: '10px',
+                          fontSize: '12px',
+                          height: '28px'
+                        }}
+                      >
+                        모두 등록
+                      </Button>
                     )}
                   </Box>
                 </TableCell>
