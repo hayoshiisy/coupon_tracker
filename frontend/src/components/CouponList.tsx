@@ -664,40 +664,6 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
 
   return (
     <Box sx={{ p: 3 }}>
-      <GlassCard sx={{ mb: 3 }}>
-        <CardContent>
-          <Stack spacing={3}>
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              mb: 2
-            }}>
-              <Typography 
-                variant="h5" 
-                sx={{ 
-                  fontWeight: 700,
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  backgroundClip: 'text',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1
-                }}
-              >
-                <SearchIcon />
-                쿠폰 검색 & 필터
-              </Typography>
-              {loading && (
-                <CircularProgress 
-                  size={24} 
-                  sx={{ 
-                    color: 'rgba(102, 126, 234, 0.8)' 
-                  }} 
-                />
-              )}
-            </Box>
 
             {/* Vercel 스타일 필터 영역 */}
             <Box sx={{ 
