@@ -699,45 +699,52 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
               )}
             </Box>
 
-            {/* 검색 및 쿠폰명 필터 */}
+            {/* Vercel 스타일 필터 영역 */}
             <Box sx={{ 
               display: 'flex', 
               gap: 2, 
               flexWrap: 'wrap',
-              alignItems: 'flex-start'
+              alignItems: 'center',
+              p: 2,
+              background: 'rgba(255, 255, 255, 0.6)',
+              backdropFilter: 'blur(15px)',
+              borderRadius: '16px',
+              border: '1px solid rgba(255, 255, 255, 0.3)'
             }}>
+              {/* 검색 필터 */}
               <Box sx={{ 
                 flex: '1 1 300px', 
                 minWidth: '300px',
                 display: 'flex',
-                gap: 1
+                gap: 1,
+                alignItems: 'center'
               }}>
+                <SearchIcon sx={{ color: '#666', fontSize: '20px' }} />
                 <TextField
                   fullWidth
                   placeholder="쿠폰명으로 검색..."
                   value={searchInput}
                   onChange={handleSearchInputChange}
                   onKeyPress={handleSearchKeyPress}
-                  InputProps={{
-                    startAdornment: <SearchIcon sx={{ mr: 1, color: '#A1A1A1' }} />,
-                    sx: {
-                      '& .MuiInputBase-input': {
-                        color: '#A1A1A1',
-                        '::placeholder': { color: '#A1A1A1', opacity: 1 }
-                      }
-                    }
-                  }}
+                  variant="outlined"
+                  size="small"
                   sx={{
                     '& .MuiOutlinedInput-root': {
-                      background: 'rgba(255, 255, 255, 0.8)',
-                      backdropFilter: 'blur(10px)',
-                      borderRadius: '12px',
-                      '& .MuiOutlinedInput-input': { color: '#0D0D0E' },
-                      '&:hover': {
                         background: 'rgba(255, 255, 255, 0.9)',
+                      borderRadius: '8px',
+                      '& .MuiOutlinedInput-input': { 
+                        color: '#333',
+                        fontSize: '14px',
+                        py: 1
                       },
-                      '&.Mui-focused': {
-                        background: 'rgba(255, 255, 255, 0.95)',
+                      '& fieldset': {
+                        borderColor: 'rgba(0, 0, 0, 0.1)',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'rgba(0, 0, 0, 0.2)',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#0070f3',
                       },
                     },
                   }}
@@ -745,36 +752,52 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                 <Button 
                   variant="contained" 
                   onClick={handleSearch}
-                  className="glass-button"
+                  size="small"
                   sx={{ 
-                    minWidth: '80px',
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    minWidth: '60px',
+                    background: '#0070f3',
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 500,
                     '&:hover': {
-                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                      background: '#0051cc',
                     },
                   }}
                 >
                   검색
                 </Button>
               </Box>
-              <Box sx={{ flex: '1 1 250px', minWidth: '250px' }}>
-                <FormControl fullWidth>
-                  <InputLabel sx={{ color: '#A1A1A1', '&.Mui-focused': { color: '#A1A1A1' } }}>쿠폰명 필터</InputLabel>
+
+              {/* 쿠폰명 필터 */}
+              <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+                <FormControl fullWidth size="small">
                   <Select
                     multiple
                     value={tempSelectedCouponNames}
                     onChange={handleTempCouponNameChange}
-                    input={<OutlinedInput label="쿠폰명 필터" />}
-                    renderValue={() => `${tempSelectedCouponNames.length}개 선택됨`}
+                    displayEmpty
+                    renderValue={() => 
+                      tempSelectedCouponNames.length > 0 
+                        ? `${tempSelectedCouponNames.length}개 선택됨` 
+                        : '쿠폰명 필터'
+                    }
                     MenuProps={MenuProps}
                     sx={{
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderRadius: '12px',
-                      },
+                      background: 'rgba(255, 255, 255, 0.9)',
+                      borderRadius: '8px',
                       '& .MuiSelect-select': {
-                        background: 'rgba(255, 255, 255, 0.8)',
-                        backdropFilter: 'blur(10px)',
-                        color: '#0D0D0E'
+                        color: '#333',
+                        fontSize: '14px',
+                        py: 1
+                      },
+                      '& fieldset': {
+                        borderColor: 'rgba(0, 0, 0, 0.1)',
+                      },
+                      '&:hover fieldset': {
+                        borderColor: 'rgba(0, 0, 0, 0.2)',
+                      },
+                      '&.Mui-focused fieldset': {
+                        borderColor: '#0070f3',
                       },
                     }}
                   >
@@ -785,467 +808,284 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     ))}
                   </Select>
                 </FormControl>
-                {tempSelectedCouponNames.length > 0 && (
-                  <Box sx={{ 
-                    mt: 1, 
-                    display: 'flex', 
-                    flexWrap: 'wrap', 
-                    gap: 0.5, 
-                    alignItems: 'center',
-                    p: 1.5,
-                    background: 'rgba(102, 126, 234, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(102, 126, 234, 0.2)'
-                  }}>
-                    {tempSelectedCouponNames.map((value) => (
-                      <Chip 
-                        key={value} 
-                        label={value} 
-                        size="small"
-                        onDelete={handleTempChipDelete(value)}
-                        deleteIcon={<ClearIcon />}
+              </Box>
+
+              {/* 지점 필터 (teamb가 아닌 경우) */}
+              {teamId !== 'teamb' && (
+                <Box sx={{ flex: '1 1 150px', minWidth: '150px' }}>
+                  <FormControl fullWidth size="small">
+                    <Select
+                      multiple
+                      value={tempSelectedStores}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        setTempSelectedStores(typeof value === 'string' ? value.split(',') : value);
+                      }}
+                      displayEmpty
+                      renderValue={() => 
+                        tempSelectedStores.length > 0 
+                          ? `${tempSelectedStores.length}개 선택됨` 
+                          : '지점 필터'
+                      }
+                      MenuProps={MenuProps}
+                      sx={{
+                        background: 'rgba(255, 255, 255, 0.9)',
+                        borderRadius: '8px',
+                        '& .MuiSelect-select': {
+                          color: '#333',
+                          fontSize: '14px',
+                          py: 1
+                        },
+                        '& fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.1)',
+                        },
+                        '&:hover fieldset': {
+                          borderColor: 'rgba(0, 0, 0, 0.2)',
+                        },
+                        '&.Mui-focused fieldset': {
+                          borderColor: '#0070f3',
+                        },
+                      }}
+                    >
+                      {storeNames.map((store) => (
+                        <MenuItem key={store} value={store}>
+                          {store}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Box>
+              )}
+
+              {/* 발행자 필터 (teamb인 경우) */}
+              {teamId === 'teamb' && (
+                <Box sx={{ flex: '1 1 200px', minWidth: '200px' }}>
+                  <Autocomplete
+                    multiple
+                    options={availableOwners}
+                    value={tempSelectedOwners}
+                    onChange={(event, newValue) => {
+                      setTempSelectedOwners(newValue);
+                    }}
+                    size="small"
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="발행자 필터"
+                        InputLabelProps={{ shrink: false }}
                         sx={{
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          color: 'white',
-                          fontWeight: 500,
-                          '& .MuiChip-deleteIcon': {
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            fontSize: '16px',
-                            '&:hover': {
-                              color: 'white',
+                          '& .MuiOutlinedInput-root': {
+                            background: 'rgba(255, 255, 255, 0.9)',
+                            borderRadius: '8px',
+                            '& fieldset': {
+                              borderColor: 'rgba(0, 0, 0, 0.1)',
                             },
+                            '&:hover fieldset': {
+                              borderColor: 'rgba(0, 0, 0, 0.2)',
+                            },
+                            '&.Mui-focused fieldset': {
+                              borderColor: '#0070f3',
+                            },
+                            '& .MuiOutlinedInput-input': { 
+                              color: '#333',
+                              fontSize: '14px',
+                              py: 1
+                            }
                           },
                         }}
                       />
-                    ))}
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={handleTempClearAllCouponNames}
-                      startIcon={<ClearAllIcon />}
-                      sx={{
-                        ml: 1,
-                        borderColor: '#FF3B30',
-                        color: '#FF3B30',
-                        fontSize: '0.75rem',
-                        minWidth: 'auto',
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: '8px',
-                        background: 'rgba(255, 255, 255, 0.8)',
-                        backdropFilter: 'blur(10px)',
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 59, 48, 0.08)',
-                          borderColor: '#FF3B30',
-                        },
-                      }}
-                    >
-                      전체 해제
-                    </Button>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-            
-            {/* 지점 선택 */}
-            {teamId !== 'teamb' && (
-              <Box sx={{ mb: 3 }}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  mb: 2,
-                  justifyContent: 'space-between'
-                }}>
-                  <Typography 
-                    variant="h6" 
-                    sx={{ 
-                      fontWeight: 600,
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      backgroundClip: 'text',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}
-                  >
-                    지점 선택
-                  </Typography>
-                  {tempSelectedStores.length > 0 && (
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      onClick={handleTempClearAllStores}
-                      startIcon={<ClearAllIcon />}
-                      sx={{
-                        borderColor: '#FF3B30',
-                        color: '#FF3B30',
-                        fontSize: '0.75rem',
-                        minWidth: 'auto',
-                        px: 1.5,
-                        py: 0.5,
-                        borderRadius: '8px',
-                        background: 'rgba(255, 255, 255, 0.8)',
-                        backdropFilter: 'blur(10px)',
-                        '&:hover': {
-                          backgroundColor: 'rgba(255, 59, 48, 0.08)',
-                          borderColor: '#FF3B30',
-                        },
-                      }}
-                    >
-                      전체 해제
-                    </Button>
-                  )}
-                </Box>
-                
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
-                  gap: 1,
-                  p: 2,
-                  background: 'rgba(255, 255, 255, 0.6)',
-                  backdropFilter: 'blur(15px)',
-                  borderRadius: '16px',
-                  border: '1px solid rgba(255, 255, 255, 0.3)'
-                }}>
-                  {storeNames.map((store) => (
-                    <Button
-                      key={store}
-                      variant={tempSelectedStores.includes(store) ? "contained" : "outlined"}
-                      size="small"
-                      onClick={() => handleTempStoreClick(store)}
-                      sx={{
-                        borderColor: tempSelectedStores.includes(store) ? 'transparent' : 'rgba(102, 126, 234, 0.3)',
-                        background: tempSelectedStores.includes(store) 
-                          ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-                          : 'rgba(255, 255, 255, 0.8)',
-                        backdropFilter: 'blur(10px)',
-                        color: tempSelectedStores.includes(store) ? 'white' : '#666',
-                        fontWeight: tempSelectedStores.includes(store) ? 600 : 400,
-                        px: 2,
-                        py: 0.5,
-                        borderRadius: '10px',
-                        transition: 'all 0.3s ease',
-                        '&:hover': {
-                          background: tempSelectedStores.includes(store) 
-                            ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)' 
-                            : 'rgba(255, 255, 255, 0.95)',
-                          transform: 'translateY(-2px)',
-                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-                        },
-                      }}
-                    >
-                      {store}
-                    </Button>
-                  ))}
-                </Box>
-                
-                {tempSelectedStores.length > 0 && (
-                  <Box sx={{ 
-                    mt: 2,
-                    p: 1.5,
-                    background: 'rgba(102, 126, 234, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(102, 126, 234, 0.2)'
-                  }}>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontWeight: 500, 
-                        mb: 1 
-                      }}
-                    >
-                      선택된 지점: {tempSelectedStores.length}개
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {tempSelectedStores.map((store) => (
-                        <Chip
-                          key={store}
-                          label={store}
-                          size="small"
-                          onDelete={() => handleTempStoreClick(store)}
-                          deleteIcon={<ClearIcon />}
-                          sx={{
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            color: 'white',
-                            fontWeight: 500,
-                            '& .MuiChip-deleteIcon': {
-                              color: 'rgba(255, 255, 255, 0.8)',
-                              fontSize: '16px',
-                              '&:hover': {
-                                color: 'white',
-                              },
+                    )}
+                    renderTags={(tagValue, getTagProps) =>
+                      tagValue.map((option, index) => (
+                      <Chip 
+                          label={option}
+                          {...getTagProps({ index })}
+                        size="small"
+                        sx={{
+                            background: '#0070f3',
+                          color: 'white',
+                            fontSize: '12px',
+                            height: '24px',
+                          '& .MuiChip-deleteIcon': {
+                            color: 'rgba(255, 255, 255, 0.8)',
+                              fontSize: '14px',
                             },
                           }}
                         />
-                      ))}
-                    </Box>
-                  </Box>
-                )}
-              </Box>
-            )}
-            
-            {/* 피플팀용 쿠폰발행자 선택 */}
-            {teamId === 'teamb' && (
-              <Box sx={{ mb: 3 }}>
-                <Box sx={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  mb: 2,
-                  justifyContent: 'flex-end'
-                }}>
-                  {tempSelectedOwners.length > 0 && (
+                      ))
+                    }
+                  />
+                </Box>
+              )}
+
+              {/* 미지정만 필터 (teamb인 경우) */}
+              {teamId === 'teamb' && (
+                <Box sx={{ flex: '0 0 auto' }}>
+                  <Button
+                    variant={onlyUnassigned ? 'contained' : 'outlined'}
+                    size="small"
+                    onClick={() => setOnlyUnassigned(prev => !prev)}
+                    sx={{
+                      borderColor: onlyUnassigned ? 'transparent' : 'rgba(0, 0, 0, 0.2)',
+                      background: onlyUnassigned ? '#0070f3' : 'rgba(255, 255, 255, 0.9)',
+                      color: onlyUnassigned ? 'white' : '#333',
+                      borderRadius: '8px',
+                      textTransform: 'none',
+                      fontWeight: 500,
+                      px: 2,
+                      py: 1,
+                            '&:hover': {
+                        background: onlyUnassigned ? '#0051cc' : 'rgba(255, 255, 255, 1)',
+                      },
+                    }}
+                  >
+                    미지정만
+                  </Button>
+                </Box>
+              )}
+
+              {/* 필터 적용/초기화 버튼 */}
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleApplyFilters}
+                  sx={{ 
+                    background: '#0070f3',
+                    borderRadius: '8px',
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    px: 2,
+                    py: 1,
+                    '&:hover': {
+                      background: '#0051cc',
+                    },
+                  }}
+                >
+                  적용
+                </Button>
                     <Button
                       variant="outlined"
                       size="small"
-                      onClick={handleTempClearAllOwners}
-                      startIcon={<ClearAllIcon />}
+                  onClick={handleResetFilters}
                       sx={{
-                        borderColor: '#FF3B30',
-                        color: '#FF3B30',
-                        fontSize: '0.75rem',
-                        minWidth: 'auto',
-                        px: 1.5,
-                        py: 0.5,
+                    borderColor: 'rgba(0, 0, 0, 0.2)',
+                    color: '#666',
                         borderRadius: '8px',
-                        background: 'rgba(255, 255, 255, 0.8)',
-                        backdropFilter: 'blur(10px)',
+                    textTransform: 'none',
+                    fontWeight: 500,
+                    px: 2,
+                    py: 1,
+                    background: 'rgba(255, 255, 255, 0.9)',
                         '&:hover': {
-                          backgroundColor: 'rgba(255, 59, 48, 0.08)',
-                          borderColor: '#FF3B30',
+                      background: 'rgba(255, 255, 255, 1)',
+                      borderColor: 'rgba(0, 0, 0, 0.3)',
                         },
                       }}
                     >
-                      전체 해제
+                  초기화
                     </Button>
-                  )}
-                </Box>
+                  </Box>
+              </Box>
 
-                <Autocomplete
-                  multiple
-                  options={availableOwners}
-                  value={tempSelectedOwners}
-                  onChange={(event, newValue) => {
-                    setTempSelectedOwners(newValue);
+            {/* 선택된 필터 표시 */}
+            {(tempSelectedCouponNames.length > 0 || tempSelectedStores.length > 0 || (teamId === 'teamb' && tempSelectedOwners.length > 0)) && (
+              <Box sx={{ 
+                mt: 2,
+                p: 2,
+                background: 'rgba(0, 112, 243, 0.1)',
+                borderRadius: '12px',
+                border: '1px solid rgba(0, 112, 243, 0.2)'
+              }}>
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: '#0070f3', 
+                    fontWeight: 500, 
+                    mb: 1,
+                    fontSize: '14px'
                   }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      placeholder="쿠폰발행자 선택"
-                      InputLabelProps={{ shrink: false }}
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <SearchIcon sx={{ mr: 1, color: '#A1A1A1' }} />
-                        ),
-                        endAdornment: (
-                          <>
-                            {tempSelectedOwners.length > 0 && (
-                              <IconButton onClick={handleTempClearAllOwners}>
-                                <ClearAllIcon />
-                              </IconButton>
-                            )}
-                            {params.InputProps.endAdornment}
-                          </>
-                        ),
-                        sx: {
-                          '& .MuiInputBase-input': {
-                            color: '#A1A1A1',
-                            '::placeholder': { color: '#A1A1A1', opacity: 1 }
-                          }
-                        }
-                      }}
+                >
+                  선택된 필터:
+                </Typography>
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  {tempSelectedCouponNames.map((name) => (
+                    <Chip
+                      key={name}
+                      label={name}
+                      size="small"
+                      onDelete={handleTempChipDelete(name)}
                       sx={{
-                        '& .MuiOutlinedInput-root': {
-                          background: 'rgba(255, 255, 255, 0.8)',
-                          backdropFilter: 'blur(10px)',
-                          borderRadius: '12px',
-                          '& fieldset': {
-                            borderColor: 'rgba(102, 126, 234, 0.3)',
-                          },
-                          '&:hover fieldset': {
-                            borderColor: 'rgba(102, 126, 234, 0.5)',
-                          },
-                          '&.Mui-focused fieldset': {
-                            borderColor: '#667eea',
-                          },
-                          '& .MuiOutlinedInput-input': { color: '#1a1a1a' }
+                        background: '#0070f3',
+                        color: 'white',
+                        fontSize: '12px',
+                        height: '24px',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          fontSize: '14px',
                         },
                       }}
                     />
-                  )}
-                  renderTags={(tagValue, getTagProps) =>
-                    tagValue.map((option, index) => (
-                      <Chip
-                        label={option}
-                        {...getTagProps({ index })}
-                        sx={{
-                          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                          color: 'white',
-                          fontWeight: 500,
-                          '& .MuiChip-deleteIcon': {
-                            color: 'rgba(255, 255, 255, 0.8)',
-                            fontSize: '16px',
-                            '&:hover': {
-                              color: 'white',
-                            },
-                          },
-                        }}
-                      />
-                    ))
-                  }
-                  renderOption={(props, option) => (
-                    <li {...props}>
-                      <Checkbox
-                        checked={tempSelectedOwners.indexOf(option) > -1}
-                        sx={{
-                          color: '#667eea',
-                          '&.Mui-checked': {
-                            color: '#667eea',
-                          },
-                        }}
-                      />
-                      <ListItemText primary={option} />
-                    </li>
-                  )}
-                  sx={{
-                    '& .MuiAutocomplete-popupIndicator': {
-                      color: 'rgba(255, 255, 255, 0.8)',
-                    },
-                    '& .MuiAutocomplete-clearIndicator': {
-                      color: 'rgba(255, 255, 255, 0.8)',
-                    },
-                    '& .MuiAutocomplete-tag': {
-                      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                      color: 'white',
-                      fontWeight: 500,
-                    },
-                    '& .MuiAutocomplete-option': {
-                      '&:hover': {
-                        background: 'rgba(102, 126, 234, 0.1)',
-                      },
-                      '&.Mui-selected': {
-                        background: 'rgba(102, 126, 234, 0.2)',
-                        '&:hover': {
-                          background: 'rgba(102, 126, 234, 0.3)',
+                  ))}
+                  {tempSelectedStores.map((store) => (
+                    <Chip
+                      key={store}
+                      label={store}
+                      size="small"
+                      onDelete={() => handleTempStoreClick(store)}
+                      sx={{
+                        background: '#0070f3',
+                        color: 'white',
+                        fontSize: '12px',
+                        height: '24px',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          fontSize: '14px',
                         },
-                      },
-                    },
-                  }}
-                />
-
-                {tempSelectedOwners.length > 0 && (
-                  <Box sx={{ 
-                    mt: 2,
-                    p: 1.5,
-                    background: 'rgba(102, 126, 234, 0.1)',
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '12px',
-                    border: '1px solid rgba(102, 126, 234, 0.2)'
-                  }}>
-                    <Typography 
-                      variant="body2" 
-                      sx={{ 
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                        backgroundClip: 'text',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        fontWeight: 500, 
-                        mb: 1 
                       }}
-                    >
-                      선택된 쿠폰발행자: {tempSelectedOwners.length}개
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {tempSelectedOwners.map((owner) => (
-                        <Chip
-                          key={owner}
-                          label={owner}
-                          size="small"
-                          onDelete={() => handleTempOwnerDelete(owner)}
-                          deleteIcon={<ClearIcon />}
-                          sx={{
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            color: 'white',
-                            fontWeight: 500,
-                            '& .MuiChip-deleteIcon': {
-                              color: 'rgba(255, 255, 255, 0.8)',
-                              fontSize: '16px',
-                              '&:hover': {
-                                color: 'white',
-                              },
-                            },
-                          }}
-                        />
-                      ))}
-                    </Box>
-                  </Box>
-                )}
+                    />
+                  ))}
+                  {teamId === 'teamb' && tempSelectedOwners.map((owner) => (
+                    <Chip
+                      key={owner}
+                      label={owner}
+                      size="small"
+                      onDelete={() => handleTempOwnerDelete(owner)}
+                      sx={{
+                        background: '#0070f3',
+                        color: 'white',
+                        fontSize: '12px',
+                        height: '24px',
+                        '& .MuiChip-deleteIcon': {
+                          color: 'rgba(255, 255, 255, 0.8)',
+                          fontSize: '14px',
+                        },
+                      }}
+                    />
+                  ))}
+            </Box>
               </Box>
             )}
             
-            {/* 필터 적용 및 초기화 버튼 */}
-            {(tempSelectedCouponNames.length > 0 || tempSelectedStores.length > 0 || (teamId === 'teamb' && (tempSelectedOwners.length > 0 || onlyUnassigned))) && (
-              <Box sx={{ display: 'flex', gap: 2, mt: 2, justifyContent: 'center' }}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleApplyFilters}
-                  className="glass-button"
-                  sx={{ 
-                    minWidth: 120,
-                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                    '&:hover': {
-                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                    },
-                  }}
-                >
-                  필터 적용
-                </Button>
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={handleResetFilters}
-                  sx={{ 
-                    minWidth: 120,
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '12px',
-                    borderColor: 'rgba(118, 75, 162, 0.3)',
-                    color: '#764ba2',
-                    '&:hover': {
-                      background: 'rgba(255, 255, 255, 0.95)',
-                      borderColor: '#764ba2',
-                    },
-                  }}
-                >
-                  전체 초기화
-                </Button>
-              </Box>
-            )}
+            
+            
 
             {/* 현재 적용된 필터 표시 */}
             {(selectedCouponNames.length > 0 || selectedStores.length > 0 || (teamId === 'teamb' && (selectedOwners.length > 0 || onlyUnassigned))) && (
               <Box sx={{ 
                 mb: 3,
                 p: 2,
-                background: 'rgba(76, 175, 80, 0.1)',
-                backdropFilter: 'blur(15px)',
-                borderRadius: '16px',
-                border: '1px solid rgba(76, 175, 80, 0.3)'
+                background: 'rgba(0, 112, 243, 0.1)',
+                borderRadius: '12px',
+                border: '1px solid rgba(0, 112, 243, 0.2)'
               }}>
                 <Typography 
-                  variant="subtitle2" 
+                  variant="body2" 
                   sx={{ 
-                    background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
-                    backgroundClip: 'text',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    fontWeight: 600, 
+                    color: '#0070f3', 
+                    fontWeight: 500, 
                     mb: 1,
+                    fontSize: '14px',
                     display: 'flex',
                     alignItems: 'center',
                     gap: 1
@@ -1260,9 +1100,10 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     <Typography 
                       variant="body2" 
                       sx={{ 
-                        color: '#4CAF50', 
+                        color: '#0070f3', 
                         fontWeight: 500, 
-                        mb: 0.5 
+                        mb: 0.5,
+                        fontSize: '13px'
                       }}
                     >
                       쿠폰명: {selectedCouponNames.length}개
@@ -1274,10 +1115,11 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                           label={name}
                           size="small"
                           sx={{
-                            background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
+                            background: '#0070f3',
                             color: 'white',
                             fontWeight: 500,
-                            fontSize: '0.75rem'
+                            fontSize: '12px',
+                            height: '24px'
                           }}
                         />
                       ))}
@@ -1290,9 +1132,10 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     <Typography 
                       variant="body2" 
                       sx={{ 
-                        color: '#4CAF50', 
+                        color: '#0070f3', 
                         fontWeight: 500, 
-                        mb: 0.5 
+                        mb: 0.5,
+                        fontSize: '13px'
                       }}
                     >
                       지점: {selectedStores.length}개
@@ -1304,10 +1147,11 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                           label={store}
                           size="small"
                           sx={{
-                            background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
+                            background: '#0070f3',
                             color: 'white',
                             fontWeight: 500,
-                            fontSize: '0.75rem'
+                            fontSize: '12px',
+                            height: '24px'
                           }}
                         />
                       ))}
@@ -1320,9 +1164,10 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                     <Typography 
                       variant="body2" 
                       sx={{ 
-                        color: '#4CAF50', 
+                        color: '#0070f3', 
                         fontWeight: 500, 
-                        mb: 0.5 
+                        mb: 0.5,
+                        fontSize: '13px'
                       }}
                     >
                       쿠폰발행자: {selectedOwners.length}개
@@ -1334,10 +1179,11 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                           label={owner}
                           size="small"
                           sx={{
-                            background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
+                            background: '#0070f3',
                             color: 'white',
                             fontWeight: 500,
-                            fontSize: '0.75rem'
+                            fontSize: '12px',
+                            height: '24px'
                           }}
                         />
                       ))}
@@ -1350,10 +1196,11 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                       label="발행자 미지정만" 
                       size="small"
                       sx={{
-                        background: 'linear-gradient(135deg, #4CAF50 0%, #45a049 100%)',
+                        background: '#0070f3',
                         color: 'white',
                         fontWeight: 500,
-                        fontSize: '0.75rem'
+                        fontSize: '12px',
+                        height: '24px'
                       }}
                     />
                   </Box>
@@ -1374,10 +1221,10 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
               <TableCell sx={{ minWidth: 120, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>상태</TableCell>
               <TableCell sx={{ minWidth: 250, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>쿠폰명</TableCell>
               {teamId !== 'teamb' && (
-                <TableCell sx={{ minWidth: 100, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>할인</TableCell>
+              <TableCell sx={{ minWidth: 100, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>할인</TableCell>
               )}
               {teamId !== 'teamb' && (
-                <TableCell sx={{ minWidth: 150, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>지점</TableCell>
+              <TableCell sx={{ minWidth: 150, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>지점</TableCell>
               )}
               <TableCell sx={{ minWidth: 120, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>만료일</TableCell>
               <TableCell sx={{ minWidth: 120, fontWeight: 'bold', color: '#FFFFFF', fontSize: '1rem' }}>쿠폰코드</TableCell>
@@ -1395,21 +1242,17 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                           size="small"
                           onClick={() => setOnlyUnassigned(prev => !prev)}
                           sx={{
-                            borderColor: onlyUnassigned ? 'transparent' : 'rgba(102, 126, 234, 0.5)',
-                            background: onlyUnassigned 
-                              ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' 
-                              : 'rgba(255, 255, 255, 0.08)',
-                            color: onlyUnassigned ? 'white' : '#e0e0e0',
-                            fontWeight: onlyUnassigned ? 600 : 500,
-                            px: 1.2,
-                            py: 0.2,
-                            borderRadius: '10px',
+                            borderColor: onlyUnassigned ? 'transparent' : 'rgba(255, 255, 255, 0.3)',
+                            background: onlyUnassigned ? '#0070f3' : 'rgba(255, 255, 255, 0.1)',
+                            color: onlyUnassigned ? 'white' : 'rgba(255, 255, 255, 0.8)',
+                            fontWeight: 500,
+                            px: 1.5,
+                            py: 0.5,
+                            borderRadius: '8px',
                             textTransform: 'none',
-                            lineHeight: 1.2,
+                            fontSize: '12px',
                             '&:hover': {
-                              background: onlyUnassigned 
-                                ? 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)' 
-                                : 'rgba(255, 255, 255, 0.16)'
+                              background: onlyUnassigned ? '#0051cc' : 'rgba(255, 255, 255, 0.2)',
                             }
                           }}
                         >
@@ -1508,31 +1351,31 @@ export const CouponList: React.FC<CouponListProps> = ({ onEditCoupon, refreshTri
                   </Typography>
                 </TableCell>
                 {teamId !== 'teamb' && (
-                  <TableCell>
-                    <Chip 
-                      label={coupon.discount || '-'} 
-                      variant="outlined" 
-                      size="small"
-                      sx={{
-                        borderColor: 'rgba(255, 255, 255, 0.4)',
+                <TableCell>
+                  <Chip 
+                    label={coupon.discount || '-'} 
+                    variant="outlined" 
+                    size="small"
+                    sx={{
+                      borderColor: 'rgba(255, 255, 255, 0.4)',
+                      color: '#FFFFFF',
+                      background: 'rgba(102, 126, 234, 0.3)',
+                      fontWeight: 700,
+                      fontSize: '0.85rem',
+                      textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
+                      '& .MuiChip-label': {
                         color: '#FFFFFF',
-                        background: 'rgba(102, 126, 234, 0.3)',
-                        fontWeight: 700,
-                        fontSize: '0.85rem',
-                        textShadow: '0 1px 2px rgba(0, 0, 0, 0.5)',
-                        '& .MuiChip-label': {
-                          color: '#FFFFFF',
-                        },
-                      }}
-                    />
-                  </TableCell>
+                      },
+                    }}
+                  />
+                </TableCell>
                 )}
                 {teamId !== 'teamb' && (
-                  <TableCell>
-                    <Typography variant="body2" sx={{ color: '#FFFFFF', fontSize: '0.95rem', textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)' }}>
-                      {coupon.store}
-                    </Typography>
-                  </TableCell>
+                <TableCell>
+                  <Typography variant="body2" sx={{ color: '#FFFFFF', fontSize: '0.95rem', textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)' }}>
+                    {coupon.store}
+                  </Typography>
+                </TableCell>
                 )}
                 <TableCell>
                   <Typography variant="body2" sx={{ color: '#FFFFFF', fontSize: '0.95rem', textShadow: '0 1px 2px rgba(0, 0, 0, 0.3)' }}>
