@@ -30,11 +30,14 @@ def get_sqlite_connection(db_path="backend/issuer_database.db"):
 
 def get_postgresql_connection():
     """PostgreSQL 데이터베이스 연결을 반환합니다."""
-    # Railway PostgreSQL 연결 정보 (실제 운영 DB)
-    database_url = "postgresql://postgres:LmBvPYZjPItRQQzAnndZBogFQfxVyUsB@postgres.railway.internal:5432/railway"
+    # 환경 변수에서 데이터베이스 연결 정보 가져오기
+    database_url = os.getenv("DATABASE_URL")
     
-    # 또는 외부 접근 URL 사용 (실제 배포 시 사용)
-    # database_url = "postgresql://postgres:LmBvPYZjPItRQQzAnndZBogFQfxVyUsB@roundhouse.proxy.rlwy.net:58662/railway"
+    if not database_url:
+        raise ValueError(
+            "DATABASE_URL 환경 변수가 설정되지 않았습니다. "
+            "Railway 환경 변수에서 DATABASE_URL을 설정해주세요."
+        )
     
     return psycopg2.connect(database_url)
 

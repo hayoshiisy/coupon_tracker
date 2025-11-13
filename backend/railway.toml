@@ -6,5 +6,8 @@ startCommand = "python -m uvicorn main:app --host 0.0.0.0 --port $PORT"
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
-[variables]
-DATABASE_URL = "postgresql://postgres:LmBvPYZjPItRQQzAnndZBogFQfxVyUsB@postgres.railway.internal:5432/railway" 
+# 주의: DATABASE_URL은 Railway 대시보드의 환경 변수에서 설정해야 합니다.
+# Railway 프로젝트 설정 > Variables에서 DATABASE_URL을 추가하세요.
+# Railway는 자동으로 PostgreSQL 서비스의 DATABASE_URL을 제공합니다.
+# [variables]
+# DATABASE_URL은 Railway 대시보드에서 설정 

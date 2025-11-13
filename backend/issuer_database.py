@@ -4,10 +4,40 @@ import logging
 from typing import List, Dict, Optional, Tuple
 from datetime import datetime
 import os
+from urllib.parse import urlparse, urlunparse
 
 # 로깅 설정
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+def mask_database_url(url: str) -> str:
+    """데이터베이스 URL에서 비밀번호를 마스킹합니다."""
+    try:
+        parsed = urlparse(url)
+        if parsed.password:
+            # 비밀번호를 마스킹
+            masked_password = "***" if parsed.password else ""
+            # 사용자명과 비밀번호를 마스킹된 버전으로 교체
+            netloc = f"{parsed.username}:{masked_password}@{parsed.hostname}"
+            if parsed.port:
+                netloc += f":{parsed.port}"
+            masked_url = urlunparse((
+                parsed.scheme,
+                netloc,
+                parsed.path,
+                parsed.params,
+                parsed.query,
+                parsed.fragment
+            ))
+            return masked_url
+        return url
+    except Exception:
+        # 파싱 실패 시 전체 URL을 마스킹
+        if "@" in url:
+            parts = url.split("@")
+            if len(parts) == 2:
+                return f"{parts[0].split(':')[0]}:***@{parts[1]}"
+        return "postgresql://***:***@***"
 
 class IssuerDatabaseService:
     def __init__(self):
@@ -23,7 +53,9 @@ class IssuerDatabaseService:
             logger.warning("발행자 DB 비활성화: DATABASE_URL 미설정. 발행자 기능 없이 동작합니다.")
             return
 
-        logger.info(f"PostgreSQL 데이터베이스 연결: {self.database_url[:50]}...")
+        # 보안: 로그에 비밀번호가 포함되지 않도록 마스킹
+        masked_url = mask_database_url(self.database_url)
+        logger.info(f"PostgreSQL 데이터베이스 연결: {masked_url}")
         try:
             self.create_tables()
         except Exception as e:
@@ -321,10 +353,12 @@ class IssuerDatabaseService:
             
             conn.close()
             
+            # 보안: 응답에 비밀번호가 포함되지 않도록 마스킹
+            masked_url = mask_database_url(self.database_url)
             return {
                 'status': 'success',
                 'database_type': 'PostgreSQL',
-                'database_url': self.database_url[:50] + "...",
+                'database_url': masked_url,  # 마스킹된 URL 반환
                 'tables': tables,
                 'issuer_count': issuer_count,
                 'mapping_count': mapping_count
