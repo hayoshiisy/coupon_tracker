@@ -25,6 +25,11 @@ async def debug_environment():
     """Railway 환경 및 SQLite 설정 확인 (디버깅용)"""
     import os
     from issuer_database import issuer_db_service
+    from issuer_database import mask_database_url
+    
+    # DATABASE_URL 마스킹
+    database_url = os.getenv('DATABASE_URL')
+    masked_database_url = mask_database_url(database_url) if database_url else None
     
     env_info = {
         "railway_environment": os.getenv('RAILWAY_ENVIRONMENT'),
@@ -37,7 +42,12 @@ async def debug_environment():
         "sqlite_db_writable": os.access(os.path.dirname(issuer_db_service.db_path), os.W_OK),
         "current_working_directory": os.getcwd(),
         "app_data_exists": os.path.exists('/app/data'),
-        "app_data_writable": os.access('/app/data', os.W_OK) if os.path.exists('/app/data') else False
+        "app_data_writable": os.access('/app/data', os.W_OK) if os.path.exists('/app/data') else False,
+        # Issuer Database 상태 추가
+        "issuer_db_disabled": issuer_db_service.disabled,
+        "issuer_db_database_url_set": database_url is not None,
+        "issuer_db_database_url_masked": masked_database_url,
+        "issuer_db_test": issuer_db_service.test_connection()
     }
     
     return env_info

@@ -47,20 +47,33 @@ class IssuerDatabaseService:
         # 간단한 인메모리 저장소 (비활성화 모드에서 사용)
         self._memory_mapping = {}  # coupon_id -> issuer_email
         self._memory_issuers = {}  # email -> {name, phone}
+        self._init_error = None  # 초기화 에러 메시지 저장
 
         if not self.database_url:
             self.disabled = True
-            logger.warning("발행자 DB 비활성화: DATABASE_URL 미설정. 발행자 기능 없이 동작합니다.")
+            self._init_error = "DATABASE_URL 환경 변수가 설정되지 않았습니다."
+            logger.error(f"발행자 DB 비활성화: {self._init_error}")
+            logger.error("Railway 대시보드에서 DATABASE_URL 환경 변수를 설정해주세요.")
             return
 
         # 보안: 로그에 비밀번호가 포함되지 않도록 마스킹
         masked_url = mask_database_url(self.database_url)
-        logger.info(f"PostgreSQL 데이터베이스 연결: {masked_url}")
+        logger.info(f"PostgreSQL 데이터베이스 연결 시도: {masked_url}")
+        
         try:
+            # 연결 테스트
+            test_conn = self.get_connection()
+            test_conn.close()
+            logger.info("PostgreSQL 데이터베이스 연결 성공")
+            
+            # 테이블 생성
             self.create_tables()
+            logger.info("발행자 DB 초기화 완료")
         except Exception as e:
             self.disabled = True
-            logger.error(f"테이블 생성 실패: {e}. 발행자 기능 비활성화 모드로 전환합니다.")
+            self._init_error = f"데이터베이스 연결 또는 테이블 생성 실패: {str(e)}"
+            logger.error(f"발행자 DB 비활성화: {self._init_error}")
+            logger.error("Railway에서 DATABASE_URL이 올바른 PostgreSQL 연결 문자열인지 확인해주세요.")
     
     def get_connection(self):
         """PostgreSQL 데이터베이스 연결을 반환합니다."""
@@ -331,7 +344,9 @@ class IssuerDatabaseService:
                 return {
                     'status': 'disabled',
                     'database_type': 'PostgreSQL',
-                    'reason': 'DATABASE_URL not set or connection failed'
+                    'reason': self._init_error or 'DATABASE_URL not set or connection failed',
+                    'database_url_set': self.database_url is not None,
+                    'database_url_masked': mask_database_url(self.database_url) if self.database_url else None
                 }
             conn = self.get_connection()
             cursor = conn.cursor()
